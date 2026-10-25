@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ApexAI - AI Monitoring System for Training Centres</title>
+  <meta name="description" content="AI Monitoring & Analytics System for Vocational & IT Training Centres. Track attendance, monitor student progress, and get automated AI risk alerts.">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+  <!-- Application Container -->
+  <div class="app-layout">
+    
+    <!-- Mobile Navigation Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="brand-logo">
+          <div class="logo-icon">
+            <i class="fa-solid fa-brain-circuit"></i>
+          </div>
+          <div class="logo-text">
+            <h2>Apex<span>AI</span></h2>
+            <p>Training Monitor</p>
+          </div>
+        </div>
+        <button class="close-sidebar-btn" id="closeSidebarBtn" aria-label="Close Sidebar">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+
+      <!-- Live AI Status Badge -->
+      <div class="ai-status-pill">
+        <span class="status-dot pulsating"></span>
+        <div class="status-info">
+          <span class="status-title">AI Engine Active</span>
+          <span class="status-subtitle">Model v2.8 • 98.4% Acc</span>
+        </div>
+      </div>
+
+      <!-- Main Navigation Links -->
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">MAIN MENU</span>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <a href="#dashboard" class="nav-link active" data-view="dashboard">
+              <i class="fa-solid fa-chart-pie"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#students" class="nav-link" data-view="students">
+              <i class="fa-solid fa-user-graduate"></i>
+              <span>Students</span>
+              <span class="badge badge-primary" id="sidebarStudentCount">24</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#trainers" class="nav-link" data-view="trainers">
+              <i class="fa-solid fa-chalkboard-user"></i>
+              <span>Trainers</span>
+              <span class="badge badge-outline" id="sidebarTrainerCount">6</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#attendance" class="nav-link" data-view="attendance">
+              <i class="fa-solid fa-calendar-check"></i>
+              <span>Attendance</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#analytics" class="nav-link" data-view="analytics">
+              <i class="fa-solid fa-chart-line"></i>
+              <span>Performance</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#insights" class="nav-link" data-view="insights">
+              <i class="fa-solid fa-wand-magic-sparkles"></i>
+              <span>AI Insights</span>
+              <span class="badge badge-danger blink" id="sidebarAlertCount">3</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a href="#reports" class="nav-link" data-view="reports">
+              <i class="fa-solid fa-file-invoice"></i>
+              <span>Reports</span>
+            </a>
+          </li>
+        </ul>
+
+        <span class="nav-section-label">SYSTEM & PREFERENCES</span>
+        <ul class="nav-list">
+          <li class="nav-item">
+            <button class="nav-link action-btn-link" id="resetDataBtn">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span>Reset Sample Data</span>
+            </button>
+          </li>
+          <li class="nav-item">
+            <a href="https://github.com" target="_blank" class="nav-link">
+              <i class="fa-solid fa-circle-question"></i>
+              <span>Documentation</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+
+      <!-- Sidebar User Profile Footer -->
+      <div class="sidebar-footer">
+        <div class="user-card">
+          <div class="avatar-ring">
+            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Center Director" class="user-avatar">
+            <span class="online-indicator"></span>
+          </div>
+          <div class="user-details">
+            <span class="user-name">Dr. Elena Vance</span>
+            <span class="user-role">Center Director</span>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-wrapper">
+      
+      <!-- Top Navigation Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-toggle-btn" id="mobileToggleBtn" aria-label="Toggle Sidebar">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="breadcrumb">
+            <span class="breadcrumb-root">ApexAI</span>
+            <i class="fa-solid fa-chevron-right separator"></i>
+            <span class="breadcrumb-current" id="currentViewTitle">Dashboard Overview</span>
+          </div>
+        </div>
+
+        <div class="topbar-center">
+          <div class="global-search-bar">
+            <i class="fa-solid fa-magnifying-glass"></i>
+            <input type="text" id="globalSearchInput" placeholder="Search students, batches, trainers, modules...">
+            <span class="search-shortcut">Ctrl+K</span>
+          </div>
+        </div>
+
+        <div class="topbar-right">
+          <!-- Live Date & Clock -->
+          <div class="live-clock-badge">
+            <i class="fa-regular fa-clock"></i>
+            <span id="liveClock">--:--:--</span>
+          </div>
+
+          <!-- Quick Action: Notifications -->
+          <div class="notifications-container">
+            <button class="icon-btn" id="notificationsBtn" aria-label="Notifications">
+              <i class="fa-regular fa-bell"></i>
+              <span class="notification-badge" id="notifBadge">3</span>
+            </button>
+            <!-- Notification Dropdown -->
+            <div class="notifications-dropdown" id="notificationsDropdown">
+              <div class="dropdown-header">
+                <h4>System & AI Alerts</h4>
+                <button class="text-link-btn" id="markAllReadBtn">Clear All</button>
+              </div>
+              <ul class="notification-list" id="notificationList">
+                <!-- Injected dynamically via JS -->
+              </ul>
+              <div class="dropdown-footer">
+                <a href="#insights" class="view-all-alerts-link" data-view="insights">Open AI Insights Hub →</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Add Button -->
+          <button class="btn btn-primary" id="quickAddStudentBtn">
+            <i class="fa-solid fa-user-plus"></i>
+            <span class="hide-mobile">Add Student</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- View Container (SPA Style Tabs) -->
+      <main class="content-body">
+        
+        <!-- ========================================== -->
+        <!-- VIEW 1: DASHBOARD OVERVIEW                 -->
+        <!-- ========================================== -->
+        <section class="view-section active" id="view-dashboard">
+          
+          <!-- Welcome Banner with AI Quick Ticker -->
+          <div class="welcome-banner">
+            <div class="welcome-text">
+              <div class="greeting-tag"><i class="fa-solid fa-sparkles"></i> AI Health Status: <strong>Optimal</strong></div>
+              <h2>Training Centre Operations Center</h2>
+              <p>Predictive attendance trends, real-time risk indicators, and automated batch interventions.</p>
+            </div>
+            <div class="welcome-actions">
+              <button class="btn btn-secondary" id="runAiHealthCheckBtn">
+                <i class="fa-solid fa-bolt"></i> Run AI Diagnosis
+              </button>
+              <button class="btn btn-glass" onclick="switchView('attendance')">
+                <i class="fa-solid fa-clipboard-user"></i> Mark Today's Roll
+              </button>
+            </div>
+          </div>
+
+          <!-- Top Metric Cards Grid (Requirement 2) -->
+          <div class="metrics-grid">
+            
+            <!-- Card 1: Total Students -->
+            <div class="metric-card card-glow-indigo">
+              <div class="metric-header">
+                <span class="metric-title">TOTAL STUDENTS</span>
+                <div class="metric-icon-box bg-indigo">
+                  <i class="fa-solid fa-user-graduate"></i>
+                </div>
+              </div>
+              <div class="metric-value-row">
+                <h3 class="metric-value" id="kpiTotalStudents">24</h3>
+                <span class="metric-trend trend-up">
+                  <i class="fa-solid fa-arrow-trend-up"></i> +12%
+                </span>
+              </div>
+              <p class="metric-caption">Across 4 specialized IT batches</p>
+              <div class="metric-progress-wrapper">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-indigo" style="width: 82%;"></div>
+                </div>
+                <span class="progress-bar-subtext">82% Centre Capacity Enrolled</span>
+              </div>
+            </div>
+
+            <!-- Card 2: Trainers -->
+            <div class="metric-card card-glow-purple">
+              <div class="metric-header">
+                <span class="metric-title">CERTIFIED TRAINERS</span>
+                <div class="metric-icon-box bg-purple">
+                  <i class="fa-solid fa-chalkboard-user"></i>
+                </div>
+              </div>
+              <div class="metric-value-row">
+                <h3 class="metric-value" id="kpiTotalTrainers">6</h3>
+                <span class="metric-trend trend-neutral">
+                  <i class="fa-solid fa-circle-check"></i> 100% Active
+                </span>
+              </div>
+              <p class="metric-caption">1:4 Trainer to Batch ratio</p>
+              <div class="metric-progress-wrapper">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-purple" style="width: 95%;"></div>
+                </div>
+                <span class="progress-bar-subtext">4.8 / 5.0 Trainer Feedback</span>
+              </div>
+            </div>
+
+            <!-- Card 3: Attendance Percentage -->
+            <div class="metric-card card-glow-cyan">
+              <div class="metric-header">
+                <span class="metric-title">ATTENDANCE RATE</span>
+                <div class="metric-icon-box bg-cyan">
+                  <i class="fa-solid fa-calendar-check"></i>
+                </div>
+              </div>
+              <div class="metric-value-row">
+                <h3 class="metric-value" id="kpiAttendanceRate">88.5%</h3>
+                <span class="metric-trend trend-up" id="kpiAttendanceDelta">
+                  <i class="fa-solid fa-arrow-trend-up"></i> +2.4%
+                </span>
+              </div>
+              <p class="metric-caption">30-day weighted center average</p>
+              <div class="metric-progress-wrapper">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-cyan" id="kpiAttendanceBar" style="width: 88.5%;"></div>
+                </div>
+                <span class="progress-bar-subtext">Target: 85.0% Centre Standard</span>
+              </div>
+            </div>
+
+            <!-- Card 4: Active Batches -->
+            <div class="metric-card card-glow-emerald">
+              <div class="metric-header">
+                <span class="metric-title">ACTIVE BATCHES</span>
+                <div class="metric-icon-box bg-emerald">
+                  <i class="fa-solid fa-layer-group"></i>
+                </div>
+              </div>
+              <div class="metric-value-row">
+                <h3 class="metric-value" id="kpiActiveBatches">4</h3>
+                <span class="metric-trend trend-up">
+                  <i class="fa-solid fa-broadcast-tower"></i> Live Labs
+                </span>
+              </div>
+              <p class="metric-caption">Python, AI/ML, Cloud, CyberSec</p>
+              <div class="metric-progress-wrapper">
+                <div class="progress-bar-bg">
+                  <div class="progress-bar-fill fill-emerald" style="width: 100%;"></div>
+                </div>
+                <span class="progress-bar-subtext">All classrooms running on schedule</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Flash Warning Alert Banner (If high-risk students exist) -->
+          <div class="ai-alert-banner" id="dashboardAiBanner">
+            <div class="alert-banner-left">
+              <div class="alert-icon-ring">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+              <div class="alert-text">
+                <h4 id="bannerAlertTitle">3 Students Identified as At-Risk of Dropping Out</h4>
+                <p id="bannerAlertSubtitle">Apex AI detected abnormal attendance drops (<75%) and lagging test performance in Python Fullstack & AI/ML batches.</p>
+              </div>
+            </div>
+            <div class="alert-banner-right">
+              <button class="btn btn-warning-soft" onclick="switchView('insights')">
+                <i class="fa-solid fa-eye"></i> View AI Intervention Plan
+              </button>
+            </div>
+          </div>
+
+          <!-- Charts Section (Requirement 6) -->
+          <div class="dashboard-charts-grid">
+            <!-- Attendance Trends Chart -->
+            <div class="card chart-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3><i class="fa-solid fa-chart-area"></i> Attendance & Trend Analysis</h3>
+                  <p>Daily center attendance vs AI forecasted baseline</p>
+                </div>
+                <div class="card-actions">
+                  <select class="form-select-sm" id="chartTimeframeSelect">
+                    <option value="weekly">Last 7 Days</option>
+                    <option value="monthly" selected>Last 4 Weeks</option>
+                  </select>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="attendanceTrendChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Student Performance by Batch Chart -->
+            <div class="card chart-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3><i class="fa-solid fa-chart-column"></i> Batch Performance Breakdown</h3>
+                  <p>Average test score & practical assignment evaluations</p>
+                </div>
+                <div class="card-actions">
+                  <span class="pill-badge pill-purple">Updated Today</span>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="batchPerformanceChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Bottom Grid: Quick High Risk List + Active Batches Summary -->
+          <div class="dashboard-bottom-grid">
+            <!-- High Risk Students Watchlist -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3><i class="fa-solid fa-shield-halved text-rose"></i> AI Risk Watchlist</h3>
+                  <p>Students flagged for immediate mentor intervention</p>
+                </div>
+                <button class="btn btn-sm btn-outline" onclick="switchView('students')">View All</button>
+              </div>
+              <div class="watchlist-list" id="dashboardRiskWatchlist">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+
+            <!-- Live Batch Status Card -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3><i class="fa-solid fa-chalkboard"></i> Real-time Batches & Labs</h3>
+                  <p>Ongoing syllabus progress and trainer schedules</p>
+                </div>
+                <span class="live-tag"><span class="status-dot pulsating"></span> Sessions In Progress</span>
+              </div>
+              <div class="batch-status-list" id="dashboardBatchList">
+                <!-- Dynamically populated -->
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: STUDENTS DIRECTORY (Requirement 4) -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-students">
+          
+          <div class="section-top-header">
+            <div>
+              <h2>Student Management & Performance Directory</h2>
+              <p>Track academic scores, attendance percentages, and AI diagnostic flags for all enrolled trainees.</p>
+            </div>
+            <div class="header-action-group">
+              <button class="btn btn-outline" id="exportStudentsBtn">
+                <i class="fa-solid fa-file-arrow-down"></i> Export CSV
+              </button>
+              <button class="btn btn-primary" id="openAddStudentModalBtn">
+                <i class="fa-solid fa-user-plus"></i> Add New Student
+              </button>
+            </div>
+          </div>
+
+          <!-- Filters & Search Toolbar -->
+          <div class="filter-toolbar card">
+            <div class="search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" id="studentSearchInput" placeholder="Search by Student Name, ID, or Email...">
+            </div>
+
+            <div class="filter-dropdowns">
+              <div class="filter-group">
+                <label for="filterBatch"><i class="fa-solid fa-layer-group"></i> Batch:</label>
+                <select id="filterBatch" class="form-select">
+                  <option value="all">All Batches</option>
+                  <option value="AI & Machine Learning">AI & Machine Learning</option>
+                  <option value="Full Stack Python">Full Stack Python</option>
+                  <option value="Cloud DevOps & AWS">Cloud DevOps & AWS</option>
+                  <option value="Cyber Security & SOC">Cyber Security & SOC</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label for="filterRisk"><i class="fa-solid fa-shield-virus"></i> AI Risk Level:</label>
+                <select id="filterRisk" class="form-select">
+                  <option value="all">All Risk Levels</option>
+                  <option value="Critical">Critical Risk (< 75%)</option>
+                  <option value="Moderate">Moderate Risk (75-84%)</option>
+                  <option value="Safe">Safe / On Track (>= 85%)</option>
+                </select>
+              </div>
+
+              <button class="btn btn-sm btn-ghost" id="clearFiltersBtn">
+                <i class="fa-solid fa-arrow-rotate-left"></i> Reset Filters
+              </button>
+            </div>
+          </div>
+
+          <!-- Students Table -->
+          <div class="card table-container">
+            <div class="table-responsive">
+              <table class="data-table" id="studentsTable">
+                <thead>
+                  <tr>
+                    <th>Student Info</th>
+                    <th>ID</th>
+                    <th>Batch / Course</th>
+                    <th>Trainer</th>
+                    <th>Attendance</th>
+                    <th>Avg Score</th>
+                    <th>AI Status</th>
+                    <th class="text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="studentsTableBody">
+                  <!-- Populated via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+
+            <div class="table-footer">
+              <div class="table-count-info" id="studentTableCount">
+                Showing 0 of 0 students
+              </div>
+              <div class="table-legend">
+                <span class="legend-item"><span class="badge-dot badge-dot-success"></span> Safe (85%+)</span>
+                <span class="legend-item"><span class="badge-dot badge-dot-warning"></span> Moderate (75-84%)</span>
+                <span class="legend-item"><span class="badge-dot badge-dot-danger"></span> Critical (<75%)</span>
+              </div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: TRAINERS DIRECTORY                 -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-trainers">
+          <div class="section-top-header">
+            <div>
+              <h2>Instructors & Faculty Directory</h2>
+              <p>Certified trainers guiding batches, managing practical laboratories, and conducting assessments.</p>
+            </div>
+            <div class="header-action-group">
+              <button class="btn btn-primary" id="openAddTrainerModalBtn">
+                <i class="fa-solid fa-user-tie"></i> Assign New Trainer
+              </button>
+            </div>
+          </div>
+
+          <!-- Trainers Grid -->
+          <div class="trainers-grid" id="trainersGrid">
+            <!-- Injected via JavaScript -->
+          </div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 4: ATTENDANCE MANAGEMENT (Req 5)      -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-attendance">
+          
+          <div class="section-top-header">
+            <div>
+              <h2>Interactive Attendance Management</h2>
+              <p>Mark daily session attendance with single-click Present/Absent toggles. Synchronizes directly with AI risk modeling.</p>
+            </div>
+            <div class="header-action-group">
+              <button class="btn btn-outline" id="markAllPresentBtn">
+                <i class="fa-solid fa-check-double text-emerald"></i> Mark All Present
+              </button>
+              <button class="btn btn-outline" id="markAllAbsentBtn">
+                <i class="fa-solid fa-xmark text-rose"></i> Mark All Absent
+              </button>
+              <button class="btn btn-primary" id="saveAttendanceBtn">
+                <i class="fa-solid fa-floppy-disk"></i> Save Attendance
+              </button>
+            </div>
+          </div>
+
+          <!-- Attendance Controls Bar -->
+          <div class="card attendance-control-card">
+            <div class="attendance-control-form">
+              <div class="control-item">
+                <label for="attendanceBatchSelect"><i class="fa-solid fa-layer-group"></i> Select Batch</label>
+                <select id="attendanceBatchSelect" class="form-select">
+                  <option value="AI & Machine Learning">AI & Machine Learning (10:00 AM)</option>
+                  <option value="Full Stack Python">Full Stack Python (08:30 AM)</option>
+                  <option value="Cloud DevOps & AWS">Cloud DevOps & AWS (02:00 PM)</option>
+                  <option value="Cyber Security & SOC">Cyber Security & SOC (04:30 PM)</option>
+                </select>
+              </div>
+
+              <div class="control-item">
+                <label for="attendanceDatePicker"><i class="fa-regular fa-calendar"></i> Attendance Date</label>
+                <input type="date" id="attendanceDatePicker" class="form-input">
+              </div>
+
+              <div class="control-item">
+                <label for="attendanceSessionTopic"><i class="fa-solid fa-book-open"></i> Session Module / Topic</label>
+                <input type="text" id="attendanceSessionTopic" class="form-input" value="Lab 14: Deep Neural Networks & Backprop">
+              </div>
+            </div>
+
+            <!-- Quick Live Stats for the Active Batch -->
+            <div class="attendance-batch-stats">
+              <div class="stat-badge stat-badge-total">
+                <span class="label">Batch Strength:</span>
+                <span class="val" id="attendStatTotal">0</span>
+              </div>
+              <div class="stat-badge stat-badge-present">
+                <span class="label">Present Today:</span>
+                <span class="val" id="attendStatPresent">0</span>
+              </div>
+              <div class="stat-badge stat-badge-absent">
+                <span class="label">Absent Today:</span>
+                <span class="val" id="attendStatAbsent">0</span>
+              </div>
+              <div class="stat-badge stat-badge-rate">
+                <span class="label">Today's Rate:</span>
+                <span class="val" id="attendStatRate">0%</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Attendance Roll Table -->
+          <div class="card table-container">
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Roll #</th>
+                    <th>Student Name</th>
+                    <th>Overall Record</th>
+                    <th>AI Risk Rating</th>
+                    <th class="text-center" style="width: 280px;">Mark Status (Today)</th>
+                    <th>Remarks</th>
+                  </tr>
+                </thead>
+                <tbody id="attendanceTableBody">
+                  <!-- Injected via JavaScript -->
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="table-footer">
+              <span class="table-count-info"><i class="fa-solid fa-info-circle"></i> Click <strong>Present</strong> or <strong>Absent</strong> to update status. Remember to click "Save Attendance".</span>
+              <button class="btn btn-sm btn-secondary" onclick="saveCurrentBatchAttendance()">
+                <i class="fa-solid fa-check"></i> Commit Attendance
+              </button>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 5: PERFORMANCE ANALYTICS (Req 6)      -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-analytics">
+          <div class="section-top-header">
+            <div>
+              <h2>Centre Performance & Learning Analytics</h2>
+              <p>Visual performance metrics, student score distributions, and topic mastery diagnostics.</p>
+            </div>
+            <div class="header-action-group">
+              <button class="btn btn-outline" id="refreshAnalyticsBtn">
+                <i class="fa-solid fa-arrows-rotate"></i> Refresh Metrics
+              </button>
+            </div>
+          </div>
+
+          <!-- Analytics KPI Row -->
+          <div class="analytics-kpi-grid">
+            <div class="analytics-kpi-card">
+              <div class="icon-circle text-emerald"><i class="fa-solid fa-award"></i></div>
+              <div class="info">
+                <h4>84.2%</h4>
+                <p>Overall Batch Test Average</p>
+              </div>
+            </div>
+            <div class="analytics-kpi-card">
+              <div class="icon-circle text-indigo"><i class="fa-solid fa-laptop-code"></i></div>
+              <div class="info">
+                <h4>91.6%</h4>
+                <p>Coding Lab Submission Rate</p>
+              </div>
+            </div>
+            <div class="analytics-kpi-card">
+              <div class="icon-circle text-purple"><i class="fa-solid fa-graduation-cap"></i></div>
+              <div class="info">
+                <h4>96.1%</h4>
+                <p>Course Certification Forecast</p>
+              </div>
+            </div>
+            <div class="analytics-kpi-card">
+              <div class="icon-circle text-cyan"><i class="fa-solid fa-microchip"></i></div>
+              <div class="info">
+                <h4>18 / 24</h4>
+                <p>Students In Safe / High Zone</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics Chart Rows -->
+          <div class="analytics-charts-grid">
+            
+            <!-- Chart 1: Batch Score Distributions -->
+            <div class="card chart-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3><i class="fa-solid fa-chart-column"></i> Batch Score Comparison (Theory vs Practical)</h3>
+                  <p>Evaluation across theory exams and hands-on coding tests</p>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="analyticsComparisonChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 2: Student Risk Distribution Doughnut -->
+            <div class="card chart-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3><i class="fa-solid fa-chart-pie"></i> Student AI Risk Classification</h3>
+                  <p>Risk distribution based on predictive attendance & tests</p>
+                </div>
+              </div>
+              <div class="chart-container-doughnut">
+                <canvas id="analyticsRiskDoughnutChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 3: Weekly Progress Heatmap/Radar -->
+            <div class="card chart-card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3><i class="fa-solid fa-spider"></i> Skill Competency Mastery</h3>
+                  <p>Aggregate skill assessment across major technical domains</p>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="analyticsRadarChart"></canvas>
+              </div>
+            </div>
+
+            <!-- Topic Bottlenecks Identified by AI -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3><i class="fa-solid fa-triangle-exclamation text-warning"></i> AI Identified Learning Bottlenecks</h3>
+                  <p>Curriculum topics with unusually high student struggle rates</p>
+                </div>
+              </div>
+              <div class="bottlenecks-list">
+                <div class="bottleneck-item">
+                  <div class="topic-meta">
+                    <span class="topic-name">Recursion & Dynamic Programming</span>
+                    <span class="topic-course">Full Stack Python</span>
+                  </div>
+                  <div class="topic-stat">
+                    <span class="badge badge-danger">41% Failure Rate</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill fill-rose" style="width: 59%;"></div>
+                  </div>
+                  <p class="suggestion-text"><i class="fa-solid fa-lightbulb"></i> AI Suggestion: Schedule 2 hours hands-on visualization lab before assessment.</p>
+                </div>
+
+                <div class="bottleneck-item">
+                  <div class="topic-meta">
+                    <span class="topic-name">Backpropagation & Gradient Descent</span>
+                    <span class="topic-course">AI & Machine Learning</span>
+                  </div>
+                  <div class="topic-stat">
+                    <span class="badge badge-warning">34% Struggle Rate</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill fill-amber" style="width: 66%;"></div>
+                  </div>
+                  <p class="suggestion-text"><i class="fa-solid fa-lightbulb"></i> AI Suggestion: Distribute Python matrix calculation cheat sheets.</p>
+                </div>
+
+                <div class="bottleneck-item">
+                  <div class="topic-meta">
+                    <span class="topic-name">Kubernetes Pod Networking & Ingress</span>
+                    <span class="topic-course">Cloud DevOps & AWS</span>
+                  </div>
+                  <div class="topic-stat">
+                    <span class="badge badge-warning">29% Struggle Rate</span>
+                  </div>
+                  <div class="progress-bar-bg">
+                    <div class="progress-bar-fill fill-amber" style="width: 71%;"></div>
+                  </div>
+                  <p class="suggestion-text"><i class="fa-solid fa-lightbulb"></i> AI Suggestion: Extend Cloud Sandbox access by 3 days for practice.</p>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 6: AI INSIGHTS & ALERTS (Req 7)       -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-insights">
+          
+          <div class="section-top-header">
+            <div>
+              <h2>AI Intelligence Hub & Risk Diagnostics</h2>
+              <p>Predictive dropout warnings, attendance anomaly alerts, and automated trainer intervention plans.</p>
+            </div>
+            <div class="header-action-group">
+              <button class="btn btn-primary" id="recomputeAiBtn">
+                <i class="fa-solid fa-wand-magic-sparkles"></i> Re-scan Student Data
+              </button>
+            </div>
+          </div>
+
+          <!-- AI Model Summary Box -->
+          <div class="ai-hero-card">
+            <div class="ai-hero-badge">
+              <i class="fa-solid fa-brain"></i> Apex Predictive Model v2.8
+            </div>
+            <div class="ai-hero-content">
+              <h3>Real-Time Dropout & Underperformance Prevention System</h3>
+              <p>The AI model continuously evaluates multi-variate metrics: consecutive unexcused absences, homework submission latency, quiz score degradation, and engagement patterns to flag students needing guidance before it's too late.</p>
+            </div>
+            <div class="ai-stats-trio">
+              <div class="stat-box">
+                <span class="stat-number text-rose" id="aiFlaggedCount">3</span>
+                <span class="stat-label">Students Flagged Critical</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-number text-amber" id="aiModerateCount">3</span>
+                <span class="stat-label">Moderate Watchlist</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-number text-emerald">94.8%</span>
+                <span class="stat-label">Prediction Accuracy</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- AI Insights Sub-Grid -->
+          <div class="ai-insights-grid">
+            
+            <!-- Left: Critical Alerts Feed -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3><i class="fa-solid fa-triangle-exclamation text-rose"></i> Low Attendance & Critical Risk Alerts</h3>
+                  <p>Students whose attendance has dropped below center compliance thresholds</p>
+                </div>
+                <span class="badge badge-danger blink">High Priority</span>
+              </div>
+
+              <div class="ai-alert-cards-container" id="aiAlertCardsList">
+                <!-- Populated dynamically via JS -->
+              </div>
+            </div>
+
+            <!-- Right: AI Actionable Improvement Suggestions -->
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title-group">
+                  <h3><i class="fa-solid fa-lightbulb text-cyan"></i> AI Improvement Recommendations</h3>
+                  <p>Automated suggestions generated from cross-cohort patterns</p>
+                </div>
+                <span class="badge badge-primary">Action Ready</span>
+              </div>
+
+              <div class="ai-suggestions-list" id="aiSuggestionsList">
+                
+                <!-- Suggestion 1 -->
+                <div class="ai-suggestion-card">
+                  <div class="suggestion-header">
+                    <div class="tag-pill tag-purple"><i class="fa-solid fa-clock"></i> Schedule Optimization</div>
+                    <span class="confidence-tag">96% Confidence</span>
+                  </div>
+                  <h4>Shift Saturday Python Morning Session by 30 Minutes</h4>
+                  <p>Attendance on Saturday 8:30 AM drops to 71% compared to 92% on weekday sessions. Shifting to 9:00 AM is predicted to recover +14% attendance.</p>
+                  <div class="suggestion-actions">
+                    <button class="btn btn-sm btn-primary" onclick="showToast('Schedule adjustment proposal sent to academic dean!', 'success')">
+                      <i class="fa-solid fa-check"></i> Implement Schedule Shift
+                    </button>
+                    <button class="btn btn-sm btn-ghost" onclick="showToast('Suggestion archived.', 'info')">Dismiss</button>
+                  </div>
+                </div>
+
+                <!-- Suggestion 2 -->
+                <div class="ai-suggestion-card">
+                  <div class="suggestion-header">
+                    <div class="tag-pill tag-cyan"><i class="fa-solid fa-book"></i> Remedial Module</div>
+                    <span class="confidence-tag">92% Confidence</span>
+                  </div>
+                  <h4>Auto-Assign Async Refresher for Data Science Batch</h4>
+                  <p>4 students in Data Science AI struggled with Linear Algebra eigen-decomposition. Automatically publish a 20-minute video walkthrough with an interactive micro-quiz.</p>
+                  <div class="suggestion-actions">
+                    <button class="btn btn-sm btn-primary" onclick="showToast('Micro-quiz and video module dispatched to batch!', 'success')">
+                      <i class="fa-solid fa-paper-plane"></i> Deploy Module to Students
+                    </button>
+                    <button class="btn btn-sm btn-ghost" onclick="showToast('Suggestion dismissed.', 'info')">Dismiss</button>
+                  </div>
+                </div>
+
+                <!-- Suggestion 3 -->
+                <div class="ai-suggestion-card">
+                  <div class="suggestion-header">
+                    <div class="tag-pill tag-emerald"><i class="fa-solid fa-user-check"></i> Peer Tutoring Match</div>
+                    <span class="confidence-tag">89% Confidence</span>
+                  </div>
+                  <h4>Pair High-Performer (Aarav S.) with At-Risk (Rohan M.)</h4>
+                  <p>Collaborative lab exercises show a 28% improvement in retention when paired with top-performing lab partners in Full Stack Python.</p>
+                  <div class="suggestion-actions">
+                    <button class="btn btn-sm btn-primary" onclick="showToast('Peer pairing request created for Trainer Vikram!', 'success')">
+                      <i class="fa-solid fa-user-group"></i> Notify Trainer & Pair
+                    </button>
+                    <button class="btn btn-sm btn-ghost" onclick="showToast('Suggestion dismissed.', 'info')">Dismiss</button>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- ========================================== -->
+        <!-- VIEW 7: REPORTS GENERATOR                  -->
+        <!-- ========================================== -->
+        <section class="view-section" id="view-reports">
+          
+          <div class="section-top-header">
+            <div>
+              <h2>Centre Reports & Compliance Export</h2>
+              <p>Generate academic audits, attendance compliance registries, and AI diagnostic reports for administration.</p>
+            </div>
+            <div class="header-action-group">
+              <button class="btn btn-primary" id="printReportBtn">
+                <i class="fa-solid fa-print"></i> Print Report
+              </button>
+            </div>
+          </div>
+
+          <!-- Report Config Card -->
+          <div class="card report-config-card">
+            <div class="report-config-grid">
+              <div class="config-col">
+                <label for="reportTypeSelect">Report Template</label>
+                <select id="reportTypeSelect" class="form-select">
+                  <option value="comprehensive">Comprehensive Centre Audit (Full Overview)</option>
+                  <option value="attendance">Detailed Attendance Compliance Sheet</option>
+                  <option value="ai-risk">AI At-Risk Intervention & Early Warning Sheet</option>
+                  <option value="trainer">Trainer Efficacy & Batch Completion Review</option>
+                </select>
+              </div>
+
+              <div class="config-col">
+                <label for="reportBatchSelect">Filter Target Cohort</label>
+                <select id="reportBatchSelect" class="form-select">
+                  <option value="all">All Batches (Combined)</option>
+                  <option value="AI & Machine Learning">AI & Machine Learning</option>
+                  <option value="Full Stack Python">Full Stack Python</option>
+                  <option value="Cloud DevOps & AWS">Cloud DevOps & AWS</option>
+                  <option value="Cyber Security & SOC">Cyber Security & SOC</option>
+                </select>
+              </div>
+
+              <div class="config-col">
+                <label for="reportDateRange">Date Range</label>
+                <select id="reportDateRange" class="form-select">
+                  <option value="current-month">Current Month (October 2026)</option>
+                  <option value="last-30">Past 30 Days</option>
+                  <option value="quarter">Q4 Term to Date</option>
+                </select>
+              </div>
+
+              <div class="config-col-btn">
+                <button class="btn btn-primary btn-block" id="generateReportPreviewBtn">
+                  <i class="fa-solid fa-gears"></i> Generate Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Report Document Preview (Print-Friendly) -->
+          <div class="card printable-report-card" id="printableReportContainer">
+            <div class="report-watermark">ApexAI Verified</div>
+            
+            <!-- Report Official Header -->
+            <div class="report-doc-header">
+              <div class="report-doc-brand">
+                <div class="logo-icon"><i class="fa-solid fa-brain-circuit"></i></div>
+                <div>
+                  <h2>Apex AI Training Institute</h2>
+                  <p>Affiliated Centre ID: #IND-TRAIN-8842 • AI Monitoring System</p>
+                </div>
+              </div>
+              <div class="report-meta">
+                <div class="meta-row"><strong>Document:</strong> <span id="reportDocName">Comprehensive Centre Audit</span></div>
+                <div class="meta-row"><strong>Generated On:</strong> <span id="reportDocDate">Oct 21, 2026</span></div>
+                <div class="meta-row"><strong>Author:</strong> Dr. Elena Vance (Center Director)</div>
+                <div class="meta-row"><strong>Status:</strong> <span class="badge badge-success">Official Audit</span></div>
+              </div>
+            </div>
+
+            <hr class="report-divider">
+
+            <!-- Report KPI Summary Blocks -->
+            <div class="report-summary-stats">
+              <div class="stat-unit">
+                <span class="u-title">Total Enrolled</span>
+                <span class="u-val" id="repTotalStudents">24</span>
+              </div>
+              <div class="stat-unit">
+                <span class="u-title">Average Attendance</span>
+                <span class="u-val" id="repAvgAttendance">88.5%</span>
+              </div>
+              <div class="stat-unit">
+                <span class="u-title">Avg Academic Score</span>
+                <span class="u-val">84.2%</span>
+              </div>
+              <div class="stat-unit">
+                <span class="u-title">At-Risk Identified</span>
+                <span class="u-val text-rose" id="repAtRiskCount">3</span>
+              </div>
+            </div>
+
+            <!-- Report Dynamic Table Preview -->
+            <div class="report-table-section">
+              <h4 id="reportTableTitle">Student Cohort Performance Ledger</h4>
+              <div class="table-responsive">
+                <table class="report-data-table" id="reportPreviewTable">
+                  <thead>
+                    <tr>
+                      <th>ID</th>
+                      <th>Student Name</th>
+                      <th>Batch</th>
+                      <th>Attendance</th>
+                      <th>Score</th>
+                      <th>AI Risk</th>
+                      <th>Recommended Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="reportPreviewTableBody">
+                    <!-- Populated dynamically via JS -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Report Sign-off Footer -->
+            <div class="report-signoff">
+              <div class="sign-block">
+                <div class="signature-line">Dr. Elena Vance</div>
+                <p>Centre Director & Principal</p>
+              </div>
+              <div class="sign-block">
+                <div class="signature-line">Apex AI System Engine</div>
+                <p>Automated Verification Signature</p>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+      </main>
+
+      <!-- App Footer -->
+      <footer class="app-footer">
+        <div class="footer-left">
+          <p>© 2026 <strong>ApexAI Monitoring System</strong>. Designed for Training & Vocational Centres.</p>
+        </div>
+        <div class="footer-right">
+          <span class="pill-badge pill-purple"><i class="fa-solid fa-code-branch"></i> GitHub Pages Ready</span>
+          <span class="pill-badge pill-cyan"><i class="fa-solid fa-bolt"></i> Pure JS + HTML5 + CSS3</span>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+  <!-- ======================================================= -->
+  <!-- MODALS CONTAINER                                        -->
+  <!-- ======================================================= -->
+
+  <!-- Modal 1: Add New Student Modal (Requirement 4) -->
+  <div class="modal-backdrop" id="addStudentModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon-badge bg-indigo"><i class="fa-solid fa-user-plus"></i></div>
+            <div>
+              <h3>Enroll New Student</h3>
+              <p>Add student details to training registry and AI model</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" onclick="closeModal('addStudentModal')">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="addStudentForm">
+          <div class="modal-body">
+            
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="newStudentName" class="form-label">Full Name <span class="required">*</span></label>
+                <input type="text" id="newStudentName" class="form-input" placeholder="e.g. Priya Sharma" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="newStudentEmail" class="form-label">Email Address <span class="required">*</span></label>
+                <input type="email" id="newStudentEmail" class="form-input" placeholder="priya@example.com" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="newStudentBatch" class="form-label">Assigned Batch <span class="required">*</span></label>
+                <select id="newStudentBatch" class="form-select" required>
+                  <option value="AI & Machine Learning">AI & Machine Learning</option>
+                  <option value="Full Stack Python" selected>Full Stack Python</option>
+                  <option value="Cloud DevOps & AWS">Cloud DevOps & AWS</option>
+                  <option value="Cyber Security & SOC">Cyber Security & SOC</option>
+                </select>
+              </div>
+
+              <div class="form-group flex-1">
+                <label for="newStudentPhone" class="form-label">Contact Number</label>
+                <input type="tel" id="newStudentPhone" class="form-input" placeholder="+91 98765 43210">
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="newStudentAttendance" class="form-label">Initial Attendance % (0-100)</label>
+                <input type="number" id="newStudentAttendance" class="form-input" min="0" max="100" value="90">
+              </div>
+              <div class="form-group flex-1">
+                <label for="newStudentScore" class="form-label">Initial Test Score % (0-100)</label>
+                <input type="number" id="newStudentScore" class="form-input" min="0" max="100" value="85">
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="newStudentNotes" class="form-label">Academic Background / Notes</label>
+              <textarea id="newStudentNotes" class="form-textarea" rows="2" placeholder="e.g. B.Tech Computer Science graduate, fast learner in Python."></textarea>
+            </div>
+
+            <div class="ai-preview-hint">
+              <i class="fa-solid fa-sparkles text-indigo"></i>
+              <span>AI will automatically assign risk category and initialize daily roll based on initial attendance.</span>
+            </div>
+
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="closeModal('addStudentModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-check"></i> Enroll Student
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 2: Student Diagnostic Profile Modal -->
+  <div class="modal-backdrop" id="studentDetailsModal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon-badge bg-purple"><i class="fa-solid fa-id-card"></i></div>
+            <div>
+              <h3 id="modalStudentName">Student Profile</h3>
+              <p id="modalStudentId">ID: #STU-000</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" onclick="closeModal('studentDetailsModal')">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="modal-body" id="modalStudentBody">
+          <!-- Dynamically populated via JS -->
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeModal('studentDetailsModal')">Close</button>
+          <button type="button" class="btn btn-primary" id="modalSendAlertBtn">
+            <i class="fa-solid fa-bell"></i> Send AI Warning Notification
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 3: Assign New Trainer Modal -->
+  <div class="modal-backdrop" id="addTrainerModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon-badge bg-purple"><i class="fa-solid fa-chalkboard-user"></i></div>
+            <div>
+              <h3>Assign New Trainer</h3>
+              <p>Add faculty mentor details and assign training cohorts</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" onclick="closeModal('addTrainerModal')">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="addTrainerForm">
+          <div class="modal-body">
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="newTrainerName" class="form-label">Instructor Name <span class="required">*</span></label>
+                <input type="text" id="newTrainerName" class="form-input" placeholder="e.g. Dr. Rajesh Khanna" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="newTrainerEmail" class="form-label">Email Address <span class="required">*</span></label>
+                <input type="email" id="newTrainerEmail" class="form-input" placeholder="r.khanna@apexai.edu" required>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="newTrainerRole" class="form-label">Role / Specialization <span class="required">*</span></label>
+                <input type="text" id="newTrainerRole" class="form-input" placeholder="e.g. Senior Deep Learning Engineer" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="newTrainerBatch" class="form-label">Primary Assigned Batch <span class="required">*</span></label>
+                <select id="newTrainerBatch" class="form-select" required>
+                  <option value="AI & Machine Learning">AI & Machine Learning</option>
+                  <option value="Full Stack Python">Full Stack Python</option>
+                  <option value="Cloud DevOps & AWS">Cloud DevOps & AWS</option>
+                  <option value="Cyber Security & SOC">Cyber Security & SOC</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="newTrainerExp" class="form-label">Years of Experience</label>
+                <input type="text" id="newTrainerExp" class="form-input" placeholder="e.g. 8 Years" value="8 Years">
+              </div>
+              <div class="form-group flex-1">
+                <label for="newTrainerRating" class="form-label">Initial Rating (1.0 - 5.0)</label>
+                <input type="number" step="0.1" min="1" max="5" id="newTrainerRating" class="form-input" value="4.9">
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="closeModal('addTrainerModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-check"></i> Assign Trainer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Custom JavaScript -->
+  <script src="script.js"></script>
+</body>
+</html>
