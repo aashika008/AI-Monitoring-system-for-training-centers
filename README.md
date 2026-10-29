@@ -139,7 +139,34 @@ npx serve .
 
 ---
 
+## 🌐 How to Deploy to GitHub Pages (Requirement 12)
 
+Because ApexAI is built with pure standard HTML, CSS, and JavaScript with no external backend server required, it is **100% compatible with GitHub Pages** out of the box!
+
+### Step-by-Step Deployment:
+1. Initialize a Git repository inside this project folder:
+   ```bash
+   git init
+   git add .
+   git commit -m "Initial commit of ApexAI Monitoring System"
+   ```
+2. Create a new repository on your GitHub account (e.g. `ai-monitoring-system-training-centres`).
+3. Connect and push your local code:
+   ```bash
+   git remote add origin https://github.com/<your-username>/<your-repo-name>.git
+   git branch -M main
+   git push -u origin main
+   ```
+4. Enable **GitHub Pages**:
+   - Go to your repository on GitHub.
+   - Click **Settings** → **Pages** (under Code and automation).
+   - Under **Build and deployment > Source**, select **Deploy from a branch**.
+   - Under **Branch**, select `main` and folder `/(root)`.
+   - Click **Save**.
+5. Within 1-2 minutes, your project will be live at:
+   ```
+   https://<your-username>.github.io/<your-repo-name>/
+   ```
 
 ---
 
