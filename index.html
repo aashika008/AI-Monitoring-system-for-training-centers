@@ -618,149 +618,336 @@
         </section>
 
         <!-- ========================================== -->
-        <!-- VIEW 5: PERFORMANCE ANALYTICS (Req 6)      -->
+        <!-- VIEW 5: PERFORMANCE & COURSE MARKS (Req 1-11) -->
         <!-- ========================================== -->
         <section class="view-section" id="view-analytics">
-          <div class="section-top-header">
-            <div>
-              <h2>Centre Performance & Learning Analytics</h2>
-              <p>Visual performance metrics, student score distributions, and topic mastery diagnostics.</p>
+          
+          <!-- LEVEL 1: MAIN COURSE-WISE PERFORMANCE DASHBOARD -->
+          <div id="perfDashboardMain">
+            <div class="section-top-header">
+              <div>
+                <h2><i class="fa-solid fa-chart-line text-purple"></i> Course Performance Dashboard</h2>
+                <p>Course-wise academic performance metrics, enrolled student tracking, and auto-calculated grades.</p>
+              </div>
+              <div class="header-action-group">
+                <button class="btn btn-primary" id="openAddMarksModalBtn">
+                  <i class="fa-solid fa-plus-circle"></i> Add Course Marks
+                </button>
+                <button class="btn btn-outline" id="refreshAnalyticsBtn">
+                  <i class="fa-solid fa-arrows-rotate"></i> Refresh Metrics
+                </button>
+              </div>
             </div>
-            <div class="header-action-group">
-              <button class="btn btn-outline" id="refreshAnalyticsBtn">
-                <i class="fa-solid fa-arrows-rotate"></i> Refresh Metrics
-              </button>
-            </div>
-          </div>
 
-          <!-- Analytics KPI Row -->
-          <div class="analytics-kpi-grid">
-            <div class="analytics-kpi-card">
-              <div class="icon-circle text-emerald"><i class="fa-solid fa-award"></i></div>
-              <div class="info">
-                <h4>84.2%</h4>
-                <p>Overall Batch Test Average</p>
+            <!-- Performance Metric Highlights -->
+            <div class="perf-stats-grid">
+              <div class="perf-stat-card">
+                <div class="perf-stat-icon text-indigo"><i class="fa-solid fa-user-graduate"></i></div>
+                <div class="perf-stat-info">
+                  <h4 id="perfStatTotalStudents">--</h4>
+                  <p>Enrolled Students</p>
+                </div>
+              </div>
+              <div class="perf-stat-card">
+                <div class="perf-stat-icon text-emerald"><i class="fa-solid fa-calculator"></i></div>
+                <div class="perf-stat-info">
+                  <h4 id="perfStatAvgPercentage">--%</h4>
+                  <p>Overall Batch Average</p>
+                </div>
+              </div>
+              <div class="perf-stat-card">
+                <div class="perf-stat-icon text-purple"><i class="fa-solid fa-book-bookmark"></i></div>
+                <div class="perf-stat-info">
+                  <h4 id="perfStatTotalCourses">4</h4>
+                  <p>Evaluated Courses</p>
+                </div>
+              </div>
+              <div class="perf-stat-card">
+                <div class="perf-stat-icon text-cyan"><i class="fa-solid fa-trophy"></i></div>
+                <div class="perf-stat-info">
+                  <h4 id="perfStatTopPerformer">--</h4>
+                  <p>Top Performer</p>
+                </div>
               </div>
             </div>
-            <div class="analytics-kpi-card">
-              <div class="icon-circle text-indigo"><i class="fa-solid fa-laptop-code"></i></div>
-              <div class="info">
-                <h4>91.6%</h4>
-                <p>Coding Lab Submission Rate</p>
-              </div>
-            </div>
-            <div class="analytics-kpi-card">
-              <div class="icon-circle text-purple"><i class="fa-solid fa-graduation-cap"></i></div>
-              <div class="info">
-                <h4>96.1%</h4>
-                <p>Course Certification Forecast</p>
-              </div>
-            </div>
-            <div class="analytics-kpi-card">
-              <div class="icon-circle text-cyan"><i class="fa-solid fa-microchip"></i></div>
-              <div class="info">
-                <h4>18 / 24</h4>
-                <p>Students In Safe / High Zone</p>
-              </div>
-            </div>
-          </div>
 
-          <!-- Analytics Chart Rows -->
-          <div class="analytics-charts-grid">
-            
-            <!-- Chart 1: Batch Score Distributions -->
-            <div class="card chart-card">
+            <!-- 4 Separate Clickable Course Cards (Requirements 1-10) -->
+            <div class="course-cards-container">
+              <div class="course-cards-section-header">
+                <div>
+                  <h3><i class="fa-solid fa-graduation-cap text-indigo"></i> Evaluated Course Programs</h3>
+                  <p>Select any course card to open its dedicated performance view and view enrolled students</p>
+                </div>
+                <span class="badge badge-primary"><i class="fa-solid fa-layer-group"></i> 4 Core Programs</span>
+              </div>
+
+              <!-- Course Cards Grid (AI Course, Python Programming, Web Development, Java Programming) -->
+              <div class="course-cards-grid" id="courseCardsGrid">
+                <!-- Injected dynamically via renderCourseDashboard() in script.js -->
+              </div>
+            </div>
+
+            <!-- All Students Performance Directory Section -->
+            <div class="student-perf-container">
+              <div class="student-perf-section-title">
+                <h3><i class="fa-solid fa-id-badge text-indigo"></i> Individual Student Performance Directory</h3>
+                <p>Each student's marks and automatically calculated percentages are displayed separately per course</p>
+              </div>
+
+              <!-- Student Performance Filter & Search Toolbar (Requirements 6 & 7) -->
+              <div class="filter-toolbar card perf-toolbar">
+                <div class="search-input-wrap">
+                  <i class="fa-solid fa-magnifying-glass"></i>
+                  <input type="text" id="perfStudentSearch" placeholder="Search student by name (e.g. Priya, Rahul)..." autocomplete="off">
+                </div>
+
+                <div class="filter-dropdowns">
+                  <div class="filter-group">
+                    <label for="perfCourseFilter"><i class="fa-solid fa-book-open"></i> Course:</label>
+                    <select id="perfCourseFilter" class="form-select">
+                      <option value="all">All Courses</option>
+                      <option value="AI Course">AI Course</option>
+                      <option value="Python Programming">Python Programming</option>
+                      <option value="Web Development">Web Development</option>
+                      <option value="Java Programming">Java Programming</option>
+                    </select>
+                  </div>
+
+                  <div class="filter-group">
+                    <label for="perfStatusFilter"><i class="fa-solid fa-award"></i> Status:</label>
+                    <select id="perfStatusFilter" class="form-select">
+                      <option value="all">All Statuses</option>
+                      <option value="Outstanding">Outstanding (90%+)</option>
+                      <option value="Excellent">Excellent (80-89%)</option>
+                      <option value="Good">Good (70-79%)</option>
+                      <option value="Average">Average (50-69%)</option>
+                      <option value="Needs Improvement">Needs Improvement (&lt;50%)</option>
+                    </select>
+                  </div>
+
+                  <button class="btn btn-sm btn-ghost" id="clearPerfFiltersBtn" title="Reset all search & filters">
+                    <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+                  </button>
+                </div>
+
+                <div class="perf-toolbar-stats">
+                  <span class="badge badge-primary" id="perfResultsCount">Showing All Students</span>
+                </div>
+              </div>
+
+              <div class="student-perf-cards-grid" id="studentPerformanceGrid">
+                <!-- Rendered dynamically by renderPerformanceSection() in script.js -->
+              </div>
+            </div>
+
+            <!-- Cohort & Curriculum Diagnostic Analytics Sub-Card -->
+            <div class="card perf-analytics-subcard">
               <div class="card-header">
                 <div class="card-title-group">
-                  <h3><i class="fa-solid fa-chart-column"></i> Batch Score Comparison (Theory vs Practical)</h3>
-                  <p>Evaluation across theory exams and hands-on coding tests</p>
+                  <h3><i class="fa-solid fa-chart-column"></i> Cohort Analytics & Curriculum Diagnostics</h3>
+                  <p>Aggregated test score comparisons, risk classification, and learning bottlenecks</p>
                 </div>
               </div>
-              <div class="chart-container">
-                <canvas id="analyticsComparisonChart"></canvas>
+
+              <!-- Analytics KPI Row -->
+              <div class="analytics-kpi-grid">
+                <div class="analytics-kpi-card">
+                  <div class="icon-circle text-emerald"><i class="fa-solid fa-award"></i></div>
+                  <div class="info">
+                    <h4>84.2%</h4>
+                    <p>Overall Batch Test Average</p>
+                  </div>
+                </div>
+                <div class="analytics-kpi-card">
+                  <div class="icon-circle text-indigo"><i class="fa-solid fa-laptop-code"></i></div>
+                  <div class="info">
+                    <h4>91.6%</h4>
+                    <p>Coding Lab Submission Rate</p>
+                  </div>
+                </div>
+                <div class="analytics-kpi-card">
+                  <div class="icon-circle text-purple"><i class="fa-solid fa-graduation-cap"></i></div>
+                  <div class="info">
+                    <h4>96.1%</h4>
+                    <p>Course Certification Forecast</p>
+                  </div>
+                </div>
+                <div class="analytics-kpi-card">
+                  <div class="icon-circle text-cyan"><i class="fa-solid fa-microchip"></i></div>
+                  <div class="info">
+                    <h4>18 / 24</h4>
+                    <p>Students In Safe / High Zone</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Analytics Chart Rows -->
+              <div class="analytics-charts-grid">
+              
+                <!-- Chart 1: Batch Score Distributions -->
+                <div class="card chart-card">
+                  <div class="card-header">
+                    <div class="card-title-group">
+                      <h3><i class="fa-solid fa-chart-column"></i> Batch Score Comparison (Theory vs Practical)</h3>
+                      <p>Evaluation across theory exams and hands-on coding tests</p>
+                    </div>
+                  </div>
+                  <div class="chart-container">
+                    <canvas id="analyticsComparisonChart"></canvas>
+                  </div>
+                </div>
+
+                <!-- Chart 2: Student Risk Distribution Doughnut -->
+                <div class="card chart-card">
+                  <div class="card-header">
+                    <div class="card-title-group">
+                      <h3><i class="fa-solid fa-chart-pie"></i> Student AI Risk Classification</h3>
+                      <p>Risk distribution based on predictive attendance & tests</p>
+                    </div>
+                  </div>
+                  <div class="chart-container-doughnut">
+                    <canvas id="analyticsRiskDoughnutChart"></canvas>
+                  </div>
+                </div>
+
+                <!-- Chart 3: Weekly Progress Heatmap/Radar -->
+                <div class="card chart-card">
+                  <div class="card-header">
+                    <div class="card-title-group">
+                      <h3><i class="fa-solid fa-spider"></i> Skill Competency Mastery</h3>
+                      <p>Aggregate skill assessment across major technical domains</p>
+                    </div>
+                  </div>
+                  <div class="chart-container">
+                    <canvas id="analyticsRadarChart"></canvas>
+                  </div>
+                </div>
+
+                <!-- Topic Bottlenecks Identified by AI -->
+                <div class="card">
+                  <div class="card-header">
+                    <div class="card-title-group">
+                      <h3><i class="fa-solid fa-triangle-exclamation text-warning"></i> AI Identified Learning Bottlenecks</h3>
+                      <p>Curriculum topics with unusually high student struggle rates</p>
+                    </div>
+                  </div>
+                  <div class="bottlenecks-list">
+                    <div class="bottleneck-item">
+                      <div class="topic-meta">
+                        <span class="topic-name">Recursion & Dynamic Programming</span>
+                        <span class="topic-course">Python Programming</span>
+                      </div>
+                      <div class="topic-stat">
+                        <span class="badge badge-danger">41% Failure Rate</span>
+                      </div>
+                      <div class="progress-bar-bg">
+                        <div class="progress-bar-fill fill-rose" style="width: 59%;"></div>
+                      </div>
+                      <p class="suggestion-text"><i class="fa-solid fa-lightbulb"></i> AI Suggestion: Schedule 2 hours hands-on visualization lab before assessment.</p>
+                    </div>
+
+                    <div class="bottleneck-item">
+                      <div class="topic-meta">
+                        <span class="topic-name">Backpropagation & Gradient Descent</span>
+                        <span class="topic-course">AI Course</span>
+                      </div>
+                      <div class="topic-stat">
+                        <span class="badge badge-warning">34% Struggle Rate</span>
+                      </div>
+                      <div class="progress-bar-bg">
+                        <div class="progress-bar-fill fill-amber" style="width: 66%;"></div>
+                      </div>
+                      <p class="suggestion-text"><i class="fa-solid fa-lightbulb"></i> AI Suggestion: Distribute Python matrix calculation cheat sheets.</p>
+                    </div>
+
+                    <div class="bottleneck-item">
+                      <div class="topic-meta">
+                        <span class="topic-name">Responsive Grid & Flexbox Layouts</span>
+                        <span class="topic-course">Web Development</span>
+                      </div>
+                      <div class="topic-stat">
+                        <span class="badge badge-warning">29% Struggle Rate</span>
+                      </div>
+                      <div class="progress-bar-bg">
+                        <div class="progress-bar-fill fill-amber" style="width: 71%;"></div>
+                      </div>
+                      <p class="suggestion-text"><i class="fa-solid fa-lightbulb"></i> AI Suggestion: Extend CSS interactive lab sandbox access by 3 days.</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            </div> <!-- /perf-analytics-subcard -->
+
+          </div> <!-- /perfDashboardMain -->
+
+          <!-- LEVEL 2: DEDICATED COURSE PERFORMANCE DETAIL VIEW -->
+          <div id="perfCourseDetailView" style="display: none;">
+            <!-- Top bar with Back Button and Course Title -->
+            <div class="course-detail-header-bar">
+              <div class="course-detail-title-group">
+                <button class="btn btn-secondary back-to-dashboard-btn" id="perfBackBtn" onclick="backToPerformanceDashboard()">
+                  <i class="fa-solid fa-arrow-left"></i> Back to Courses
+                </button>
+                <div class="course-detail-icon-circle" id="courseDetailIconBox">
+                  <i class="fa-solid fa-brain" id="courseDetailIcon"></i>
+                </div>
+                <div>
+                  <h2 id="courseDetailTitle">AI Course</h2>
+                  <p id="courseDetailSubtitle">Performance records for students enrolled in this course</p>
+                </div>
+              </div>
+              <div class="course-detail-stats-pills">
+                <div class="course-stat-pill">
+                  <i class="fa-solid fa-users text-indigo"></i>
+                  <span>Enrolled: <strong id="courseDetailEnrolledCount">0</strong></span>
+                </div>
+                <div class="course-stat-pill">
+                  <i class="fa-solid fa-calculator text-emerald"></i>
+                  <span>Course Average: <strong id="courseDetailAvgScore">0%</strong></span>
+                </div>
+                <div class="course-stat-pill">
+                  <i class="fa-solid fa-circle-check text-cyan"></i>
+                  <span>Pass Rate: <strong id="courseDetailPassRate">100%</strong></span>
+                </div>
               </div>
             </div>
 
-            <!-- Chart 2: Student Risk Distribution Doughnut -->
-            <div class="card chart-card">
-              <div class="card-header">
-                <div class="card-title-group">
-                  <h3><i class="fa-solid fa-chart-pie"></i> Student AI Risk Classification</h3>
-                  <p>Risk distribution based on predictive attendance & tests</p>
-                </div>
+            <!-- Course-Specific Search & Filter Toolbar -->
+            <div class="filter-toolbar card perf-toolbar">
+              <div class="search-input-wrap">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="courseDetailStudentSearch" placeholder="Search student in this course (e.g. Priya, Rahul)..." autocomplete="off">
               </div>
-              <div class="chart-container-doughnut">
-                <canvas id="analyticsRiskDoughnutChart"></canvas>
+
+              <div class="filter-dropdowns">
+                <div class="filter-group">
+                  <label for="courseDetailStatusFilter"><i class="fa-solid fa-award"></i> Status:</label>
+                  <select id="courseDetailStatusFilter" class="form-select">
+                    <option value="all">All Statuses</option>
+                    <option value="Outstanding">Outstanding (90%+)</option>
+                    <option value="Excellent">Excellent (80-89%)</option>
+                    <option value="Good">Good (70-79%)</option>
+                    <option value="Average">Average (50-69%)</option>
+                    <option value="Needs Improvement">Needs Improvement (&lt;50%)</option>
+                  </select>
+                </div>
+
+                <button class="btn btn-sm btn-ghost" id="clearCourseDetailFiltersBtn" onclick="clearCourseDetailFilters()" title="Reset search & filters">
+                  <i class="fa-solid fa-arrow-rotate-left"></i> Reset
+                </button>
+              </div>
+
+              <div class="perf-toolbar-stats">
+                <span class="badge badge-primary" id="courseDetailResultsCount">Showing 0 Students</span>
               </div>
             </div>
 
-            <!-- Chart 3: Weekly Progress Heatmap/Radar -->
-            <div class="card chart-card">
-              <div class="card-header">
-                <div class="card-title-group">
-                  <h3><i class="fa-solid fa-spider"></i> Skill Competency Mastery</h3>
-                  <p>Aggregate skill assessment across major technical domains</p>
-                </div>
-              </div>
-              <div class="chart-container">
-                <canvas id="analyticsRadarChart"></canvas>
-              </div>
+            <!-- Enrolled Students Cards Grid for Selected Course -->
+            <div class="course-students-grid" id="courseStudentsGrid">
+              <!-- Rendered dynamically by openCoursePerformance() & filterCourseDetailStudents() -->
             </div>
-
-            <!-- Topic Bottlenecks Identified by AI -->
-            <div class="card">
-              <div class="card-header">
-                <div class="card-title-group">
-                  <h3><i class="fa-solid fa-triangle-exclamation text-warning"></i> AI Identified Learning Bottlenecks</h3>
-                  <p>Curriculum topics with unusually high student struggle rates</p>
-                </div>
-              </div>
-              <div class="bottlenecks-list">
-                <div class="bottleneck-item">
-                  <div class="topic-meta">
-                    <span class="topic-name">Recursion & Dynamic Programming</span>
-                    <span class="topic-course">Full Stack Python</span>
-                  </div>
-                  <div class="topic-stat">
-                    <span class="badge badge-danger">41% Failure Rate</span>
-                  </div>
-                  <div class="progress-bar-bg">
-                    <div class="progress-bar-fill fill-rose" style="width: 59%;"></div>
-                  </div>
-                  <p class="suggestion-text"><i class="fa-solid fa-lightbulb"></i> AI Suggestion: Schedule 2 hours hands-on visualization lab before assessment.</p>
-                </div>
-
-                <div class="bottleneck-item">
-                  <div class="topic-meta">
-                    <span class="topic-name">Backpropagation & Gradient Descent</span>
-                    <span class="topic-course">AI & Machine Learning</span>
-                  </div>
-                  <div class="topic-stat">
-                    <span class="badge badge-warning">34% Struggle Rate</span>
-                  </div>
-                  <div class="progress-bar-bg">
-                    <div class="progress-bar-fill fill-amber" style="width: 66%;"></div>
-                  </div>
-                  <p class="suggestion-text"><i class="fa-solid fa-lightbulb"></i> AI Suggestion: Distribute Python matrix calculation cheat sheets.</p>
-                </div>
-
-                <div class="bottleneck-item">
-                  <div class="topic-meta">
-                    <span class="topic-name">Kubernetes Pod Networking & Ingress</span>
-                    <span class="topic-course">Cloud DevOps & AWS</span>
-                  </div>
-                  <div class="topic-stat">
-                    <span class="badge badge-warning">29% Struggle Rate</span>
-                  </div>
-                  <div class="progress-bar-bg">
-                    <div class="progress-bar-fill fill-amber" style="width: 71%;"></div>
-                  </div>
-                  <p class="suggestion-text"><i class="fa-solid fa-lightbulb"></i> AI Suggestion: Extend Cloud Sandbox access by 3 days for practice.</p>
-                </div>
-              </div>
-            </div>
-
-          </div>
+          </div> <!-- /perfCourseDetailView -->
 
         </section>
 
@@ -1226,6 +1413,75 @@
             <button type="button" class="btn btn-ghost" onclick="closeModal('addTrainerModal')">Cancel</button>
             <button type="submit" class="btn btn-primary">
               <i class="fa-solid fa-check"></i> Assign Trainer
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal 4: Add / Update Student Course Marks (Requirement 3, 4, 5) -->
+  <div class="modal-backdrop" id="addMarksModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <div class="modal-title-wrap">
+            <div class="modal-icon-badge bg-purple"><i class="fa-solid fa-pen-to-square"></i></div>
+            <div>
+              <h3>Add / Update Course Marks</h3>
+              <p>Record student course scores with live percentage calculation</p>
+            </div>
+          </div>
+          <button class="modal-close-btn" onclick="closeModal('addMarksModal')">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <form id="addMarksForm">
+          <div class="modal-body">
+            <div class="form-group">
+              <label for="marksStudentSelect" class="form-label">Student Name <span class="required">*</span></label>
+              <select id="marksStudentSelect" class="form-select" required>
+                <!-- Populated dynamically -->
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="marksCourseName" class="form-label">Course Name <span class="required">*</span></label>
+              <input type="text" id="marksCourseName" class="form-input" placeholder="e.g. Python Programming" list="courseSuggestions" required>
+              <datalist id="courseSuggestions">
+                <option value="AI Course">
+                <option value="Python Programming">
+                <option value="Web Development">
+                <option value="Java Programming">
+              </datalist>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group flex-1">
+                <label for="marksObtained" class="form-label">Marks Obtained <span class="required">*</span></label>
+                <input type="number" id="marksObtained" class="form-input" min="0" max="500" placeholder="e.g. 85" required>
+              </div>
+              <div class="form-group flex-1">
+                <label for="marksTotal" class="form-label">Total Marks <span class="required">*</span></label>
+                <input type="number" id="marksTotal" class="form-input" min="1" max="500" value="100" required>
+              </div>
+            </div>
+
+            <!-- Live Calculation Preview -->
+            <div class="perf-calc-preview" id="marksCalcPreview">
+              <div class="preview-label"><i class="fa-solid fa-calculator"></i> Automatic Calculation Preview:</div>
+              <div class="preview-metrics">
+                <span>Percentage: <strong id="previewPercentage">--%</strong></span>
+                <span>Status: <span class="status-badge status-good" id="previewStatus">--</span></span>
+              </div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-ghost" onclick="closeModal('addMarksModal')">Cancel</button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fa-solid fa-check"></i> Save Marks
             </button>
           </div>
         </form>
