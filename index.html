@@ -705,11 +705,11 @@
                   <div class="filter-group">
                     <label for="perfCourseFilter"><i class="fa-solid fa-book-open"></i> Course:</label>
                     <select id="perfCourseFilter" class="form-select">
-                      <option value="all">All Courses</option>
-                      <option value="AI Course">AI Course</option>
-                      <option value="Python Programming">Python Programming</option>
+                      <option value="all">All Courses (Combined Overview)</option>
+                      <option value="AI Fundamentals">AI Fundamentals</option>
                       <option value="Web Development">Web Development</option>
-                      <option value="Java Programming">Java Programming</option>
+                      <option value="Python Programming">Python Programming</option>
+                      <option value="Data Analytics">Data Analytics</option>
                     </select>
                   </div>
 
@@ -849,7 +849,7 @@
                     <div class="bottleneck-item">
                       <div class="topic-meta">
                         <span class="topic-name">Backpropagation & Gradient Descent</span>
-                        <span class="topic-course">AI Course</span>
+                        <span class="topic-course">AI Fundamentals</span>
                       </div>
                       <div class="topic-stat">
                         <span class="badge badge-warning">34% Struggle Rate</span>
@@ -893,8 +893,8 @@
                   <i class="fa-solid fa-brain" id="courseDetailIcon"></i>
                 </div>
                 <div>
-                  <h2 id="courseDetailTitle">AI Course</h2>
-                  <p id="courseDetailSubtitle">Performance records for students enrolled in this course</p>
+                  <h2 id="courseDetailTitle">AI Fundamentals</h2>
+                  <p id="courseDetailSubtitle">Performance records, individual marks, and grades for enrolled students</p>
                 </div>
               </div>
               <div class="course-detail-stats-pills">
@@ -1448,13 +1448,12 @@
 
             <div class="form-group">
               <label for="marksCourseName" class="form-label">Course Name <span class="required">*</span></label>
-              <input type="text" id="marksCourseName" class="form-input" placeholder="e.g. Python Programming" list="courseSuggestions" required>
-              <datalist id="courseSuggestions">
-                <option value="AI Course">
-                <option value="Python Programming">
-                <option value="Web Development">
-                <option value="Java Programming">
-              </datalist>
+              <select id="marksCourseName" class="form-select" required>
+                <option value="AI Fundamentals">AI Fundamentals</option>
+                <option value="Web Development">Web Development</option>
+                <option value="Python Programming">Python Programming</option>
+                <option value="Data Analytics">Data Analytics</option>
+              </select>
             </div>
 
             <div class="form-row">

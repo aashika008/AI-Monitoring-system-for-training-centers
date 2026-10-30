@@ -55,12 +55,23 @@ Zero-reload, smooth tab switching for:
 - Live batch counters updating present, absent, and attendance rates on the fly.
 - Commit button that syncs daily records, updates student historical attendance %, and re-evaluates risk flags.
 
-### 6. Dynamic Chart.js Analytics
-- **Weekly & Monthly Attendance Trend**: Area chart showing actual attendance vs 85% AI baseline.
-- **Batch Performance Comparison**: Bar chart of average scores across technical domains.
-- **Theory vs Practical Scores**: Grouped bar chart comparing academic vs laboratory evaluations.
-- **Student AI Risk Classification**: Doughnut chart breaking down Safe vs Moderate vs Critical cohorts.
-- **Skill Competency Mastery**: Radar chart evaluating code quality, cloud infra, debugging, and labs.
+### 6. Course Performance & Dual-Engine Analytics
+- **4 Dedicated Courses**:
+  - **AI Fundamentals** (Batch Lead: Dr. Vikramaditya Roy)
+  - **Web Development** (Batch Lead: Sarah Jenkins)
+  - **Python Programming** (Batch Lead: Rajesh Iyer)
+  - **Data Analytics** (Batch Lead: Priya Nair)
+- **Interactive Course Drilldown**:
+  - Level 1: Overview cards for all 4 courses displaying enrolled trainees, course average score, and grade distribution pills (A+, A, B, C, D, F).
+  - Level 2: Clicking any course card opens that course's student roster with individual marks (e.g., 94/100), calculated percentage, letter grade badge, status, and AI notes.
+- **Dual Charting Engine (Chart.js + Native HTML5 Canvas Fallback)**:
+  - If Chart.js CDN is online, renders responsive interactive Chart.js graphs.
+  - If offline or on isolated `file://` protocol, seamlessly falls back to a built-in Native HTML5 2D Canvas engine with zero dependencies or errors.
+  - **Weekly & Monthly Attendance Trend**: Area chart showing actual attendance vs 85% AI baseline.
+  - **Batch Performance Breakdown**: Bar chart of average scores across technical domains.
+  - **Theory vs Practical Scores**: Grouped bar chart comparing academic vs laboratory evaluations.
+  - **Student AI Risk Classification**: Doughnut chart breaking down Safe vs Moderate vs Critical cohorts.
+  - **Skill Competency Mastery**: Radar chart evaluating code quality, cloud infra, debugging, and labs.
 
 ### 7. AI Insights & Risk Diagnostics
 - Identifies trainees at immediate risk of dropping out due to low attendance (<75%) or consecutive absences.

@@ -1,11 +1,25 @@
 /**
  * ApexAI - AI Monitoring System for Training Centres
- * Frontend Logic, State Management, Interactivity & Chart.js Integration
+ * Frontend Logic, State Management, Interactivity, HTML5 Canvas & Chart.js Integration
  */
 
 // ============================================================================
-// 1. INITIAL SAMPLE DATA GENERATOR (Requirement 8)
+// 1. CORE CONFIGURATION & CONSTANTS
 // ============================================================================
+
+const CORE_COURSES = [
+  "AI Fundamentals",
+  "Web Development",
+  "Python Programming",
+  "Data Analytics"
+];
+
+const COURSE_DESCRIPTIONS = {
+  "AI Fundamentals": "Neural networks, prompt engineering, predictive modeling & computer vision fundamentals",
+  "Web Development": "Modern full-stack JavaScript, responsive UI architecture, HTML5 & RESTful services",
+  "Python Programming": "Core data structures, OOP paradigms, async programming & API microservices",
+  "Data Analytics": "Statistical modeling, ETL data pipelines, SQL queries, Pandas & business dashboards"
+};
 
 const DEFAULT_TRAINERS = [
   {
@@ -28,7 +42,7 @@ const DEFAULT_TRAINERS = [
     batches: ["Full Stack Python"],
     experience: "9 Years",
     rating: "4.8",
-    studentsCount: 6,
+    studentsCount: 8,
     email: "a.deshmukh@apexai.edu",
     status: "Available"
   },
@@ -121,71 +135,42 @@ const DEFAULT_BATCHES = [
   }
 ];
 
-const COURSE_CATALOG_BY_BATCH = {
-  "AI & Machine Learning": [
-    { courseName: "Python Programming", baseScore: 92 },
-    { courseName: "AI & Machine Learning", baseScore: 89 },
-    { courseName: "Data Structures & Algorithms", baseScore: 86 }
-  ],
-  "Full Stack Python": [
-    { courseName: "Python Programming", baseScore: 88 },
-    { courseName: "Web Development", baseScore: 84 },
-    { courseName: "Java Programming", baseScore: 78 }
-  ],
-  "Cloud DevOps & AWS": [
-    { courseName: "Cloud Computing & AWS", baseScore: 92 },
-    { courseName: "DevOps & Docker", baseScore: 90 },
-    { courseName: "Python Programming", baseScore: 85 }
-  ],
-  "Cyber Security & SOC": [
-    { courseName: "Cyber Security Essentials", baseScore: 91 },
-    { courseName: "Network Security & Protocols", baseScore: 88 },
-    { courseName: "Python Programming", baseScore: 84 }
-  ]
-};
-
+// Helper to ensure each student has marks for all 4 courses
 function ensureStudentCourses(student) {
-  if (student.courses && Array.isArray(student.courses) && student.courses.length > 0) {
-    return student.courses;
-  }
-  
-  const sName = (student.name || "").trim().toLowerCase();
-  if (sName === "priya") {
-    return [
-      { courseName: "Python Programming", totalMarks: 100, marksObtained: 85 },
-      { courseName: "Java Programming", totalMarks: 100, marksObtained: 90 },
-      { courseName: "Web Development", totalMarks: 100, marksObtained: 78 }
-    ];
-  }
-  
-  if (sName === "rahul") {
-    return [
-      { courseName: "Python Programming", totalMarks: 100, marksObtained: 92 },
-      { courseName: "Java Programming", totalMarks: 100, marksObtained: 76 },
-      { courseName: "Web Development", totalMarks: 100, marksObtained: 88 }
-    ];
+  if (student.courses && Array.isArray(student.courses)) {
+    student.courses.forEach(c => {
+      if (c.courseName === "AI Course" || c.courseName === "AI & Machine Learning") {
+        c.courseName = "AI Fundamentals";
+      }
+      if (c.courseName === "Java Programming" || c.courseName === "Data Structures & Algorithms" || c.courseName === "Cloud Computing & AWS") {
+        c.courseName = "Data Analytics";
+      }
+    });
+  } else {
+    student.courses = [];
   }
 
-  const batchTemplates = COURSE_CATALOG_BY_BATCH[student.batch] || [
-    { courseName: "Python Programming", baseScore: student.score || 85 },
-    { courseName: "Web Development", baseScore: Math.max(45, (student.score || 80) - 4) },
-    { courseName: "Java Programming", baseScore: Math.max(45, (student.score || 80) + 3) }
-  ];
-
+  const existingNames = student.courses.map(c => c.courseName);
+  const baseScore = student.score || 82;
   const seed = (student.id || "1").charCodeAt((student.id || "1").length - 1);
-  return batchTemplates.map((t, idx) => {
-    const delta = (((seed + idx * 7) % 11) - 5);
-    const scoreVal = Math.min(100, Math.max(42, (student.score || t.baseScore) + delta));
-    return {
-      courseName: t.courseName,
-      totalMarks: 100,
-      marksObtained: scoreVal
-    };
+
+  CORE_COURSES.forEach((cName, idx) => {
+    if (!existingNames.includes(cName)) {
+      const delta = (((seed + idx * 7) % 13) - 6);
+      const scoreVal = Math.min(98, Math.max(48, Math.round(baseScore + delta)));
+      student.courses.push({
+        courseName: cName,
+        totalMarks: 100,
+        marksObtained: scoreVal
+      });
+    }
   });
+
+  return student.courses;
 }
 
 const DEFAULT_STUDENTS = [
-  // Demonstration Students (Requirements 1-11 & Prompt Example)
+  // Demonstration Students
   {
     id: "STU-001",
     name: "Priya",
@@ -194,15 +179,16 @@ const DEFAULT_STUDENTS = [
     batch: "Full Stack Python",
     trainer: "Ananya Deshmukh",
     attendance: 94,
-    score: 84,
+    score: 87,
     todayAttendance: "present",
     notes: "Top-tier performance across programming modules and web architecture.",
     consecutiveAbsences: 0,
     riskFactors: [],
     courses: [
-      { courseName: "Python Programming", totalMarks: 100, marksObtained: 85 },
-      { courseName: "Java Programming", totalMarks: 100, marksObtained: 90 },
-      { courseName: "Web Development", totalMarks: 100, marksObtained: 78 }
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 88 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 84 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 92 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 86 }
     ]
   },
   {
@@ -213,15 +199,16 @@ const DEFAULT_STUDENTS = [
     batch: "Full Stack Python",
     trainer: "Ananya Deshmukh",
     attendance: 92,
-    score: 85,
+    score: 86,
     todayAttendance: "present",
     notes: "Demonstrates outstanding algorithmic efficiency and full stack development.",
     consecutiveAbsences: 0,
     riskFactors: [],
     courses: [
-      { courseName: "Python Programming", totalMarks: 100, marksObtained: 92 },
-      { courseName: "Java Programming", totalMarks: 100, marksObtained: 76 },
-      { courseName: "Web Development", totalMarks: 100, marksObtained: 88 }
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 82 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 90 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 88 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 84 }
     ]
   },
 
@@ -234,15 +221,16 @@ const DEFAULT_STUDENTS = [
     batch: "AI & Machine Learning",
     trainer: "Dr. Vikramaditya Roy",
     attendance: 96,
-    score: 94,
+    score: 95,
     todayAttendance: "present",
     notes: "Outstanding grasp on calculus and linear algebra. High engagement.",
     consecutiveAbsences: 0,
     riskFactors: [],
     courses: [
-      { courseName: "Python Programming", totalMarks: 100, marksObtained: 94 },
-      { courseName: "AI & Machine Learning", totalMarks: 100, marksObtained: 91 },
-      { courseName: "Data Structures & Algorithms", totalMarks: 100, marksObtained: 88 }
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 98 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 92 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 96 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 94 }
     ]
   },
   {
@@ -253,11 +241,17 @@ const DEFAULT_STUDENTS = [
     batch: "AI & Machine Learning",
     trainer: "Dr. Vikramaditya Roy",
     attendance: 91,
-    score: 88,
+    score: 89,
     todayAttendance: "present",
     notes: "Consistently submits PyTorch assignments early.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 91 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 86 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 90 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 88 }
+    ]
   },
   {
     id: "STU-103",
@@ -271,7 +265,13 @@ const DEFAULT_STUDENTS = [
     todayAttendance: "absent",
     notes: "Missed 3 lab sessions in October. Struggling with Backprop math.",
     consecutiveAbsences: 3,
-    riskFactors: ["Attendance dropped to 72% (<75% critical cutoff)", "Missed 3 consecutive weekend labs", "Test 2 score fell below 65%"]
+    riskFactors: ["Attendance dropped to 72% (<75% critical cutoff)", "Missed 3 consecutive weekend labs", "Test 2 score fell below 65%"],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 62 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 66 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 68 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 60 }
+    ]
   },
   {
     id: "STU-104",
@@ -281,11 +281,17 @@ const DEFAULT_STUDENTS = [
     batch: "AI & Machine Learning",
     trainer: "Dr. Vikramaditya Roy",
     attendance: 86,
-    score: 82,
+    score: 83,
     todayAttendance: "present",
     notes: "Active participant during code reviews.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 84 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 81 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 85 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 82 }
+    ]
   },
   {
     id: "STU-105",
@@ -295,11 +301,17 @@ const DEFAULT_STUDENTS = [
     batch: "AI & Machine Learning",
     trainer: "Dr. Vikramaditya Roy",
     attendance: 78,
-    score: 75,
+    score: 76,
     todayAttendance: "present",
     notes: "Moderate pace. Requires extra review on vector embeddings.",
     consecutiveAbsences: 1,
-    riskFactors: ["Attendance fluctuating between 76-80%", "Assignment 3 submitted 2 days late"]
+    riskFactors: ["Attendance fluctuating between 76-80%", "Assignment 3 submitted 2 days late"],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 74 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 78 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 77 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 75 }
+    ]
   },
   {
     id: "STU-106",
@@ -309,11 +321,17 @@ const DEFAULT_STUDENTS = [
     batch: "AI & Machine Learning",
     trainer: "Dr. Vikramaditya Roy",
     attendance: 94,
-    score: 92,
+    score: 93,
     todayAttendance: "present",
     notes: "Top performer in CNN architecture design.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 95 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 90 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 94 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 92 }
+    ]
   },
 
   // Full Stack Python Batch
@@ -329,7 +347,13 @@ const DEFAULT_STUDENTS = [
     todayAttendance: "absent",
     notes: "High dropout probability. Multiple unexcused morning lab absences.",
     consecutiveAbsences: 4,
-    riskFactors: ["Attendance fallen to 68% (Extreme Dropout Risk)", "Failed Module 2 Test (58%)", "Zero repository commits in last 10 days"]
+    riskFactors: ["Attendance fallen to 68% (Extreme Dropout Risk)", "Failed Module 2 Test (58%)", "Zero repository commits in last 10 days"],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 58 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 60 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 56 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 52 }
+    ]
   },
   {
     id: "STU-202",
@@ -343,7 +367,13 @@ const DEFAULT_STUDENTS = [
     todayAttendance: "present",
     notes: "Built full CRUD REST API ahead of schedule. Excellent student.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 94 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 98 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 97 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 93 }
+    ]
   },
   {
     id: "STU-203",
@@ -353,11 +383,17 @@ const DEFAULT_STUDENTS = [
     batch: "Full Stack Python",
     trainer: "Ananya Deshmukh",
     attendance: 88,
-    score: 84,
+    score: 85,
     todayAttendance: "present",
     notes: "Solid understanding of asynchronous Python and SQLAlchemy.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 83 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 88 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 87 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 81 }
+    ]
   },
   {
     id: "STU-204",
@@ -367,11 +403,17 @@ const DEFAULT_STUDENTS = [
     batch: "Full Stack Python",
     trainer: "Ananya Deshmukh",
     attendance: 92,
-    score: 90,
+    score: 91,
     todayAttendance: "present",
     notes: "Fast frontend styling with CSS & responsive design.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 89 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 94 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 92 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 88 }
+    ]
   },
   {
     id: "STU-205",
@@ -381,11 +423,17 @@ const DEFAULT_STUDENTS = [
     batch: "Full Stack Python",
     trainer: "Ananya Deshmukh",
     attendance: 80,
-    score: 76,
+    score: 77,
     todayAttendance: "present",
     notes: "Needs clarification on Git merge conflict resolutions.",
     consecutiveAbsences: 1,
-    riskFactors: ["Attendance borderline (80%)", "Struggled in recursive function test"]
+    riskFactors: ["Attendance borderline (80%)", "Struggled in recursive function test"],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 75 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 80 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 78 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 74 }
+    ]
   },
   {
     id: "STU-206",
@@ -395,11 +443,17 @@ const DEFAULT_STUDENTS = [
     batch: "Full Stack Python",
     trainer: "Ananya Deshmukh",
     attendance: 90,
-    score: 85,
+    score: 86,
     todayAttendance: "present",
     notes: "Good progress in React component lifecycle integration.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 84 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 89 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 87 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 83 }
+    ]
   },
 
   // Cloud DevOps & AWS Batch
@@ -415,7 +469,13 @@ const DEFAULT_STUDENTS = [
     todayAttendance: "present",
     notes: "Configured Terraform IaC pipelines flawlessly in AWS Sandbox.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 90 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 92 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 95 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 94 }
+    ]
   },
   {
     id: "STU-302",
@@ -425,11 +485,17 @@ const DEFAULT_STUDENTS = [
     batch: "Cloud DevOps & AWS",
     trainer: "Marcus Aurelius Vance",
     attendance: 89,
-    score: 87,
+    score: 88,
     todayAttendance: "present",
     notes: "Strong in Docker multi-stage builds and security linting.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 87 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 89 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 88 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 86 }
+    ]
   },
   {
     id: "STU-303",
@@ -443,7 +509,13 @@ const DEFAULT_STUDENTS = [
     todayAttendance: "absent",
     notes: "Repeatedly absent during Jenkins CI/CD labs. Low confidence.",
     consecutiveAbsences: 3,
-    riskFactors: ["Attendance 71% below safety barrier", "Incomplete Kubernetes deployment capstone", "Risk score 84/100"]
+    riskFactors: ["Attendance 71% below safety barrier", "Incomplete Kubernetes deployment capstone", "Risk score 84/100"],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 60 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 65 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 58 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 62 }
+    ]
   },
   {
     id: "STU-304",
@@ -457,7 +529,13 @@ const DEFAULT_STUDENTS = [
     todayAttendance: "present",
     notes: "Excellent performance in AWS IAM & VPC network peering.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 94 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 93 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 96 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 95 }
+    ]
   },
   {
     id: "STU-305",
@@ -467,11 +545,17 @@ const DEFAULT_STUDENTS = [
     batch: "Cloud DevOps & AWS",
     trainer: "Marcus Aurelius Vance",
     attendance: 85,
-    score: 81,
+    score: 82,
     todayAttendance: "present",
     notes: "Good progress. Working on Helm charts for stateful workloads.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 80 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 83 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 84 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 81 }
+    ]
   },
   {
     id: "STU-306",
@@ -485,7 +569,13 @@ const DEFAULT_STUDENTS = [
     todayAttendance: "present",
     notes: "Consistent attendance and proactive lab completion.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 86 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 89 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 89 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 87 }
+    ]
   },
 
   // Cyber Security & SOC Batch
@@ -501,7 +591,13 @@ const DEFAULT_STUDENTS = [
     todayAttendance: "present",
     notes: "Discovered zero-day simulation vulnerability in CTF challenge.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 95 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 94 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 98 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 96 }
+    ]
   },
   {
     id: "STU-402",
@@ -515,7 +611,13 @@ const DEFAULT_STUDENTS = [
     todayAttendance: "present",
     notes: "Proficient with Wireshark packet analysis and Snort rules.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 88 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 87 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 92 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 88 }
+    ]
   },
   {
     id: "STU-403",
@@ -525,11 +627,17 @@ const DEFAULT_STUDENTS = [
     batch: "Cyber Security & SOC",
     trainer: "Zoya Farooqui",
     attendance: 82,
-    score: 79,
+    score: 80,
     todayAttendance: "present",
     notes: "Good progress in SIEM Splunk queries. Needs practice in iptables.",
     consecutiveAbsences: 1,
-    riskFactors: ["Missed 2 evening sessions in past fortnight"]
+    riskFactors: ["Missed 2 evening sessions in past fortnight"],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 80 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 78 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 82 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 79 }
+    ]
   },
   {
     id: "STU-404",
@@ -539,11 +647,17 @@ const DEFAULT_STUDENTS = [
     batch: "Cyber Security & SOC",
     trainer: "Zoya Farooqui",
     attendance: 90,
-    score: 86,
+    score: 87,
     todayAttendance: "present",
     notes: "Active contributor in incident response simulation exercises.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 86 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 88 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 89 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 85 }
+    ]
   },
   {
     id: "STU-405",
@@ -553,11 +667,17 @@ const DEFAULT_STUDENTS = [
     batch: "Cyber Security & SOC",
     trainer: "Zoya Farooqui",
     attendance: 87,
-    score: 83,
+    score: 84,
     todayAttendance: "present",
     notes: "Solid analytical capability in malware sandbox analysis.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 82 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 83 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 87 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 83 }
+    ]
   },
   {
     id: "STU-406",
@@ -571,7 +691,13 @@ const DEFAULT_STUDENTS = [
     todayAttendance: "present",
     notes: "High scoring in cryptography and public key infrastructure.",
     consecutiveAbsences: 0,
-    riskFactors: []
+    riskFactors: [],
+    courses: [
+      { courseName: "AI Fundamentals", totalMarks: 100, marksObtained: 92 },
+      { courseName: "Web Development", totalMarks: 100, marksObtained: 89 },
+      { courseName: "Python Programming", totalMarks: 100, marksObtained: 94 },
+      { courseName: "Data Analytics", totalMarks: 100, marksObtained: 90 }
+    ]
   }
 ];
 
@@ -599,7 +725,7 @@ const NOTIFICATIONS = [
     type: "info",
     icon: "fa-wand-magic-sparkles",
     title: "AI Model Retrained",
-    text: "Apex Neural Model v2.8 re-indexed 24 student activity logs with 98.4% convergence.",
+    text: "Apex Neural Model v2.8 re-indexed 26 student activity logs with 98.4% convergence.",
     time: "2 hours ago",
     unread: true
   }
@@ -609,7 +735,7 @@ const NOTIFICATIONS = [
 // 2. APPLICATION STATE & PERSISTENCE
 // ============================================================================
 
-const STORAGE_KEY = "APEX_AI_MONITORING_DATA_V1";
+const STORAGE_KEY = "APEX_AI_MONITORING_DATA_V2";
 
 let appState = {
   students: [],
@@ -630,12 +756,123 @@ function calculateStudentRisk(student) {
   }
 }
 
+function getGrade(percentage) {
+  if (percentage >= 90) {
+    return {
+      grade: "A+",
+      label: "Grade A+",
+      color: "grade-aplus",
+      badgeClass: "badge-purple",
+      desc: "Outstanding Mastery"
+    };
+  } else if (percentage >= 80) {
+    return {
+      grade: "A",
+      label: "Grade A",
+      color: "grade-a",
+      badgeClass: "badge-success",
+      desc: "Excellent Performance"
+    };
+  } else if (percentage >= 70) {
+    return {
+      grade: "B",
+      label: "Grade B",
+      color: "grade-b",
+      badgeClass: "badge-primary",
+      desc: "Good Comprehension"
+    };
+  } else if (percentage >= 60) {
+    return {
+      grade: "C",
+      label: "Grade C",
+      color: "grade-c",
+      badgeClass: "badge-warning",
+      desc: "Average Proficiency"
+    };
+  } else if (percentage >= 50) {
+    return {
+      grade: "D",
+      label: "Grade D",
+      color: "grade-d",
+      badgeClass: "badge-amber",
+      desc: "Passing Standard"
+    };
+  } else {
+    return {
+      grade: "F",
+      label: "Grade F",
+      color: "grade-f",
+      badgeClass: "badge-danger",
+      desc: "Needs Improvement"
+    };
+  }
+}
+
+function getPerformanceStatus(percentage) {
+  if (percentage >= 90) {
+    return {
+      status: "Outstanding",
+      badgeClass: "badge-purple",
+      statusClass: "status-outstanding",
+      fillClass: "fill-purple",
+      icon: "fa-solid fa-crown"
+    };
+  } else if (percentage >= 80) {
+    return {
+      status: "Excellent",
+      badgeClass: "badge-success",
+      statusClass: "status-excellent",
+      fillClass: "fill-emerald",
+      icon: "fa-solid fa-star"
+    };
+  } else if (percentage >= 70) {
+    return {
+      status: "Good",
+      badgeClass: "badge-primary",
+      statusClass: "status-good",
+      fillClass: "fill-indigo",
+      icon: "fa-solid fa-thumbs-up"
+    };
+  } else if (percentage >= 50) {
+    return {
+      status: "Average",
+      badgeClass: "badge-warning",
+      statusClass: "status-average",
+      fillClass: "fill-amber",
+      icon: "fa-solid fa-chart-simple"
+    };
+  } else {
+    return {
+      status: "Needs Improvement",
+      badgeClass: "badge-danger",
+      statusClass: "status-improvement",
+      fillClass: "fill-rose",
+      icon: "fa-solid fa-triangle-exclamation"
+    };
+  }
+}
+
+function getCourseIcon(courseName) {
+  const name = (courseName || "").toLowerCase();
+  if (name.includes("ai") || name.includes("machine") || name.includes("fund")) return "fa-solid fa-brain text-purple";
+  if (name.includes("web") || name.includes("dev") || name.includes("html") || name.includes("code")) return "fa-solid fa-code text-cyan";
+  if (name.includes("python")) return "fa-brands fa-python text-indigo";
+  if (name.includes("data") || name.includes("analytic")) return "fa-solid fa-chart-pie text-emerald";
+  return "fa-solid fa-book-open text-indigo";
+}
+
 function initDataState() {
-  const saved = localStorage.getItem(STORAGE_KEY);
+  let saved = null;
+  try {
+    saved = localStorage.getItem(STORAGE_KEY) || localStorage.getItem("APEX_AI_MONITORING_DATA_V1");
+  } catch (e) {
+    console.warn("localStorage read failed:", e);
+  }
+
   if (saved) {
     try {
       const parsed = JSON.parse(saved);
-      appState.students = parsed.students || DEFAULT_STUDENTS;
+      appState.students = parsed.students || JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
       appState.trainers = parsed.trainers || DEFAULT_TRAINERS;
       appState.batches = parsed.batches || DEFAULT_BATCHES;
     } catch (e) {
@@ -646,92 +883,44 @@ function initDataState() {
     appState.students = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
   }
 
-  // Ensure Priya exists at the beginning with exact sample values
-  let priya = appState.students.find(s => s.name.trim().toLowerCase() === "priya");
-  if (!priya) {
-    priya = {
-      id: "STU-001",
-      name: "Priya",
-      email: "priya@apexai.edu",
-      phone: "+91 98201 10001",
-      batch: "Full Stack Python",
-      trainer: "Ananya Deshmukh",
-      attendance: 94,
-      score: 84,
-      todayAttendance: "present",
-      notes: "Top-tier performance across programming modules and web architecture.",
-      consecutiveAbsences: 0,
-      riskFactors: [],
-      courses: [
-        { courseName: "Python Programming", totalMarks: 100, marksObtained: 85 },
-        { courseName: "Java Programming", totalMarks: 100, marksObtained: 90 },
-        { courseName: "Web Development", totalMarks: 100, marksObtained: 78 }
-      ]
-    };
-    appState.students.unshift(priya);
-  } else {
-    priya.courses = [
-      { courseName: "Python Programming", totalMarks: 100, marksObtained: 85 },
-      { courseName: "Java Programming", totalMarks: 100, marksObtained: 90 },
-      { courseName: "Web Development", totalMarks: 100, marksObtained: 78 }
-    ];
-  }
-
-  // Ensure Rahul exists right after Priya with exact sample values
-  let rahul = appState.students.find(s => s.name.trim().toLowerCase() === "rahul");
-  if (!rahul) {
-    rahul = {
-      id: "STU-002",
-      name: "Rahul",
-      email: "rahul@apexai.edu",
-      phone: "+91 98201 10002",
-      batch: "Full Stack Python",
-      trainer: "Ananya Deshmukh",
-      attendance: 92,
-      score: 85,
-      todayAttendance: "present",
-      notes: "Demonstrates outstanding algorithmic efficiency and full stack development.",
-      consecutiveAbsences: 0,
-      riskFactors: [],
-      courses: [
-        { courseName: "Python Programming", totalMarks: 100, marksObtained: 92 },
-        { courseName: "Java Programming", totalMarks: 100, marksObtained: 76 },
-        { courseName: "Web Development", totalMarks: 100, marksObtained: 88 }
-      ]
-    };
-    const priyaIdx = appState.students.findIndex(s => s.name.trim().toLowerCase() === "priya");
-    appState.students.splice(priyaIdx + 1, 0, rahul);
-  } else {
-    rahul.courses = [
-      { courseName: "Python Programming", totalMarks: 100, marksObtained: 92 },
-      { courseName: "Java Programming", totalMarks: 100, marksObtained: 76 },
-      { courseName: "Web Development", totalMarks: 100, marksObtained: 88 }
-    ];
-  }
-
-  // Ensure all students have courses populated and riskLevel calculated
+  // Ensure risk tags and 4 core courses exist for all students
   appState.students.forEach(s => {
-    s.courses = ensureStudentCourses(s);
     s.riskLevel = calculateStudentRisk(s);
     if (!s.riskFactors) s.riskFactors = [];
+    ensureStudentCourses(s);
   });
 
   persistState();
 }
 
 function persistState() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    students: appState.students,
-    trainers: appState.trainers,
-    batches: appState.batches
-  }));
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({
+      students: appState.students,
+      trainers: appState.trainers,
+      batches: appState.batches
+    }));
+  } catch (e) {
+    console.warn("localStorage write failed:", e);
+  }
 }
 
 function resetToDefaultState() {
-  if (confirm("Reset all student and attendance records to original sample data?")) {
-    localStorage.removeItem(STORAGE_KEY);
+  if (confirm("Reset all student, course marks, and attendance records to original sample data?")) {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem("APEX_AI_MONITORING_DATA_V1");
+    } catch (e) {}
+
     appState.students = JSON.parse(JSON.stringify(DEFAULT_STUDENTS));
-    appState.students.forEach(s => s.riskLevel = calculateStudentRisk(s));
+    appState.trainers = JSON.parse(JSON.stringify(DEFAULT_TRAINERS));
+    appState.batches = JSON.parse(JSON.stringify(DEFAULT_BATCHES));
+
+    appState.students.forEach(s => {
+      s.riskLevel = calculateStudentRisk(s);
+      ensureStudentCourses(s);
+    });
+
     persistState();
     refreshAllViews();
     showToast("Sample data restored successfully!", "success");
@@ -739,17 +928,566 @@ function resetToDefaultState() {
 }
 
 // ============================================================================
-// 3. CHART CONTROLLERS & INSTANCES (Requirement 6)
+// 3. CHART CONTROLLER & HIGH-COMPATIBILITY NATIVE CANVAS RENDERER
 // ============================================================================
 
 let chartInstances = {};
+let useNativeCharts = false;
 
-function initCharts() {
-  // Common Chart.js styling
+// Native HTML5 Canvas Chart Drawing Engine
+// Renders responsive, dark-navy & purple styled charts with zero dependencies
+function drawNativeAttendanceTrend(mode) {
+  const canvas = document.getElementById("attendanceTrendChart");
+  if (!canvas) return;
+
+  const parent = canvas.parentElement;
+  const width = (parent ? parent.clientWidth : 500) || 500;
+  const height = 280;
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const isWeekly = mode !== "monthly";
+  const labels = isWeekly 
+    ? ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Today"] 
+    : ["Week 1", "Week 2", "Week 3", "Week 4"];
+  const data = isWeekly 
+    ? [92, 89, 94, 88, 91, 85, 88.5] 
+    : [86.2, 89.1, 87.8, 88.5];
+  const targetVal = 85;
+
+  const padLeft = 45;
+  const padRight = 30;
+  const padTop = 38;
+  const padBottom = 35;
+  const chartW = width - padLeft - padRight;
+  const chartH = height - padTop - padBottom;
+
+  const minVal = 60;
+  const maxVal = 100;
+
+  function getY(val) {
+    return padTop + chartH - ((val - minVal) / (maxVal - minVal)) * chartH;
+  }
+  function getX(idx) {
+    return padLeft + (idx / (data.length - 1)) * chartW;
+  }
+
+  // Draw Horizontal Grid lines
+  ctx.lineWidth = 1;
+  ctx.font = "11px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#94a3b8";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+
+  const gridVals = [60, 70, 80, 90, 100];
+  gridVals.forEach(g => {
+    const y = getY(g);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+    ctx.setLineDash([]);
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(width - padRight, y);
+    ctx.stroke();
+    ctx.fillText(g + "%", padLeft - 8, y);
+  });
+
+  // Draw Target Baseline (85%)
+  const targetY = getY(targetVal);
+  ctx.strokeStyle = "rgba(6, 182, 212, 0.7)";
+  ctx.lineWidth = 1.5;
+  ctx.setLineDash([5, 5]);
+  ctx.beginPath();
+  ctx.moveTo(padLeft, targetY);
+  ctx.lineTo(width - padRight, targetY);
+  ctx.stroke();
+  ctx.setLineDash([]);
+
+  // Top Legend
+  ctx.font = "11px 'Plus Jakarta Sans', sans-serif";
+  ctx.textAlign = "left";
+  // Purple actual
+  ctx.fillStyle = "#8b5cf6";
+  ctx.beginPath();
+  ctx.arc(padLeft + 10, 16, 5, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.fillStyle = "#e2e8f0";
+  ctx.fillText("Actual Attendance %", padLeft + 22, 17);
+
+  // Cyan target
+  ctx.strokeStyle = "#06b6d4";
+  ctx.lineWidth = 2;
+  ctx.setLineDash([4, 4]);
+  ctx.beginPath();
+  ctx.moveTo(padLeft + 170, 16);
+  ctx.lineTo(padLeft + 190, 16);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = "#e2e8f0";
+  ctx.fillText("AI Target Baseline (85%)", padLeft + 198, 17);
+
+  // Draw Area Gradient Under Curve
+  const grad = ctx.createLinearGradient(0, padTop, 0, padTop + chartH);
+  grad.addColorStop(0, "rgba(139, 92, 246, 0.35)");
+  grad.addColorStop(1, "rgba(139, 92, 246, 0.0)");
+
+  ctx.beginPath();
+  ctx.moveTo(getX(0), getY(data[0]));
+  for (let i = 1; i < data.length; i++) {
+    const prevX = getX(i - 1);
+    const prevY = getY(data[i - 1]);
+    const currX = getX(i);
+    const currY = getY(data[i]);
+    const cpX1 = prevX + (currX - prevX) * 0.45;
+    const cpX2 = prevX + (currX - prevX) * 0.55;
+    ctx.bezierCurveTo(cpX1, prevY, cpX2, currY, currX, currY);
+  }
+  ctx.lineTo(getX(data.length - 1), padTop + chartH);
+  ctx.lineTo(getX(0), padTop + chartH);
+  ctx.closePath();
+  ctx.fillStyle = grad;
+  ctx.fill();
+
+  // Draw Line
+  ctx.beginPath();
+  ctx.moveTo(getX(0), getY(data[0]));
+  for (let i = 1; i < data.length; i++) {
+    const prevX = getX(i - 1);
+    const prevY = getY(data[i - 1]);
+    const currX = getX(i);
+    const currY = getY(data[i]);
+    const cpX1 = prevX + (currX - prevX) * 0.45;
+    const cpX2 = prevX + (currX - prevX) * 0.55;
+    ctx.bezierCurveTo(cpX1, prevY, cpX2, currY, currX, currY);
+  }
+  ctx.strokeStyle = "#8b5cf6";
+  ctx.lineWidth = 3;
+  ctx.stroke();
+
+  // Draw Points & Labels
+  for (let i = 0; i < data.length; i++) {
+    const px = getX(i);
+    const py = getY(data[i]);
+
+    // Outer Glow / Ring
+    ctx.fillStyle = "#8b5cf6";
+    ctx.beginPath();
+    ctx.arc(px, py, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Center Dot
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Value tag above point
+    ctx.font = "bold 10px 'JetBrains Mono', monospace";
+    ctx.fillStyle = i === data.length - 1 ? "#38bdf8" : "#f1f5f9";
+    ctx.textAlign = "center";
+    ctx.fillText(data[i] + "%", px, py - 10);
+
+    // X-axis label
+    ctx.font = "11px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillStyle = "#94a3b8";
+    ctx.fillText(labels[i], px, padTop + chartH + 18);
+  }
+}
+
+function drawNativeBatchPerformance() {
+  const canvas = document.getElementById("batchPerformanceChart");
+  if (!canvas) return;
+
+  const parent = canvas.parentElement;
+  const width = (parent ? parent.clientWidth : 500) || 500;
+  const height = 280;
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  // Compute dynamic averages from current students
+  const batches = [
+    { label: "AI & ML", fullName: "AI & Machine Learning", defaultScore: 86.8, c1: "#6366f1", c2: "#818cf8" },
+    { label: "Python FS", fullName: "Full Stack Python", defaultScore: 83.2, c1: "#8b5cf6", c2: "#c084fc" },
+    { label: "DevOps/AWS", fullName: "Cloud DevOps & AWS", defaultScore: 88.5, c1: "#06b6d4", c2: "#38bdf8" },
+    { label: "CyberSec", fullName: "Cyber Security & SOC", defaultScore: 90.2, c1: "#10b981", c2: "#34d399" }
+  ];
+
+  batches.forEach(b => {
+    const inBatch = appState.students.filter(s => s.batch === b.fullName);
+    if (inBatch.length > 0) {
+      const avg = inBatch.reduce((sum, s) => sum + Number(s.score || 80), 0) / inBatch.length;
+      b.score = Math.round(avg * 10) / 10;
+    } else {
+      b.score = b.defaultScore;
+    }
+  });
+
+  const padLeft = 45;
+  const padRight = 30;
+  const padTop = 38;
+  const padBottom = 35;
+  const chartW = width - padLeft - padRight;
+  const chartH = height - padTop - padBottom;
+
+  const minVal = 50;
+  const maxVal = 100;
+
+  function getY(val) {
+    return padTop + chartH - ((val - minVal) / (maxVal - minVal)) * chartH;
+  }
+
+  // Draw Grid lines
+  ctx.lineWidth = 1;
+  ctx.font = "11px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#94a3b8";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+
+  [50, 60, 70, 80, 90, 100].forEach(g => {
+    const y = getY(g);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(width - padRight, y);
+    ctx.stroke();
+    ctx.fillText(g + "%", padLeft - 8, y);
+  });
+
+  // Top header text
+  ctx.font = "11px 'Plus Jakarta Sans', sans-serif";
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#e2e8f0";
+  ctx.fillText("Average Test & Practical Assessment Score (%)", padLeft + 6, 17);
+
+  // Draw Bars
+  const barCount = batches.length;
+  const slotW = chartW / barCount;
+  const barW = Math.min(52, slotW * 0.58);
+
+  batches.forEach((b, idx) => {
+    const centerX = padLeft + idx * slotW + slotW / 2;
+    const barX = centerX - barW / 2;
+    const barY = getY(b.score);
+    const barH = (padTop + chartH) - barY;
+
+    // Gradient bar
+    const barGrad = ctx.createLinearGradient(0, barY, 0, barY + barH);
+    barGrad.addColorStop(0, b.c2);
+    barGrad.addColorStop(1, b.c1);
+
+    ctx.fillStyle = barGrad;
+    // Rounded bar top
+    const radius = 6;
+    ctx.beginPath();
+    ctx.moveTo(barX, padTop + chartH);
+    ctx.lineTo(barX, barY + radius);
+    ctx.quadraticCurveTo(barX, barY, barX + radius, barY);
+    ctx.lineTo(barX + barW - radius, barY);
+    ctx.quadraticCurveTo(barX + barW, barY, barX + barW, barY + radius);
+    ctx.lineTo(barX + barW, padTop + chartH);
+    ctx.closePath();
+    ctx.fill();
+
+    // Value label on top
+    ctx.font = "bold 12px 'JetBrains Mono', monospace";
+    ctx.fillStyle = "#ffffff";
+    ctx.textAlign = "center";
+    ctx.fillText(b.score + "%", centerX, barY - 8);
+
+    // Label below
+    ctx.font = "bold 11px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillStyle = "#cbd5e1";
+    ctx.fillText(b.label, centerX, padTop + chartH + 18);
+  });
+}
+
+function drawNativeComparisonChart() {
+  const canvas = document.getElementById("analyticsComparisonChart");
+  if (!canvas) return;
+
+  const parent = canvas.parentElement;
+  const width = (parent ? parent.clientWidth : 500) || 500;
+  const height = 280;
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const categories = ["AI & ML", "Python FS", "DevOps/AWS", "CyberSec"];
+  const theory = [84, 82, 86, 89];
+  const practical = [89, 85, 91, 92];
+
+  const padLeft = 45;
+  const padRight = 30;
+  const padTop = 38;
+  const padBottom = 35;
+  const chartW = width - padLeft - padRight;
+  const chartH = height - padTop - padBottom;
+
+  function getY(val) {
+    return padTop + chartH - ((val - 50) / 50) * chartH;
+  }
+
+  // Grid
+  ctx.font = "11px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#94a3b8";
+  ctx.textAlign = "right";
+  ctx.textBaseline = "middle";
+
+  [50, 60, 70, 80, 90, 100].forEach(g => {
+    const y = getY(g);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(width - padRight, y);
+    ctx.stroke();
+    ctx.fillText(g + "%", padLeft - 8, y);
+  });
+
+  // Top Legend
+  ctx.font = "11px 'Plus Jakarta Sans', sans-serif";
+  ctx.textAlign = "left";
+  // Theory (Indigo)
+  ctx.fillStyle = "#6366f1";
+  ctx.fillRect(padLeft + 10, 11, 12, 10);
+  ctx.fillStyle = "#e2e8f0";
+  ctx.fillText("Theory Exams", padLeft + 28, 17);
+
+  // Practical (Purple)
+  ctx.fillStyle = "#a855f7";
+  ctx.fillRect(padLeft + 140, 11, 12, 10);
+  ctx.fillStyle = "#e2e8f0";
+  ctx.fillText("Hands-on Practical Labs", padLeft + 158, 17);
+
+  const slotW = chartW / categories.length;
+  const barW = Math.min(22, slotW * 0.28);
+
+  categories.forEach((cat, idx) => {
+    const center = padLeft + idx * slotW + slotW / 2;
+    const x1 = center - barW - 2;
+    const x2 = center + 2;
+
+    // Bar 1 (Theory)
+    const y1 = getY(theory[idx]);
+    ctx.fillStyle = "rgba(99, 102, 241, 0.85)";
+    ctx.fillRect(x1, y1, barW, padTop + chartH - y1);
+
+    // Bar 2 (Practical)
+    const y2 = getY(practical[idx]);
+    ctx.fillStyle = "rgba(168, 85, 247, 0.85)";
+    ctx.fillRect(x2, y2, barW, padTop + chartH - y2);
+
+    // X-axis label
+    ctx.font = "11px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillStyle = "#cbd5e1";
+    ctx.textAlign = "center";
+    ctx.fillText(cat, center, padTop + chartH + 18);
+  });
+}
+
+function drawNativeRiskDoughnut() {
+  const canvas = document.getElementById("analyticsRiskDoughnutChart");
+  if (!canvas) return;
+
+  const parent = canvas.parentElement;
+  const width = (parent ? parent.clientWidth : 340) || 340;
+  const height = 280;
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const safeCount = appState.students.filter(s => s.riskLevel === "Safe").length;
+  const moderateCount = appState.students.filter(s => s.riskLevel === "Moderate").length;
+  const criticalCount = appState.students.filter(s => s.riskLevel === "Critical").length;
+  const total = safeCount + moderateCount + criticalCount || 1;
+
+  const data = [
+    { label: "Safe (>85%)", count: safeCount, color: "#10b981" },
+    { label: "Moderate (75-84%)", count: moderateCount, color: "#f59e0b" },
+    { label: "Critical (<75%)", count: criticalCount, color: "#f43f5e" }
+  ];
+
+  const centerX = width / 2;
+  const centerY = height / 2 - 14;
+  const outerR = Math.min(centerX, centerY) - 20;
+  const innerR = outerR * 0.68;
+
+  let startAngle = -Math.PI / 2;
+
+  data.forEach(seg => {
+    const sliceAngle = (seg.count / total) * (Math.PI * 2);
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, outerR, startAngle, startAngle + sliceAngle);
+    ctx.arc(centerX, centerY, innerR, startAngle + sliceAngle, startAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = seg.color;
+    ctx.fill();
+    ctx.lineWidth = 3;
+    ctx.strokeStyle = "#0b101f";
+    ctx.stroke();
+
+    startAngle += sliceAngle;
+  });
+
+  // Center text
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.font = "bold 20px 'JetBrains Mono', monospace";
+  ctx.fillStyle = "#ffffff";
+  ctx.fillText(total + "", centerX, centerY - 8);
+  ctx.font = "11px 'Plus Jakarta Sans', sans-serif";
+  ctx.fillStyle = "#94a3b8";
+  ctx.fillText("Trainees", centerX, centerY + 12);
+
+  // Bottom Legend
+  ctx.font = "11px 'Plus Jakarta Sans', sans-serif";
+  ctx.textAlign = "center";
+  const legendY = height - 15;
+  const gap = width / 3;
+
+  data.forEach((seg, idx) => {
+    const lx = gap * idx + gap / 2;
+    ctx.fillStyle = seg.color;
+    ctx.beginPath();
+    ctx.arc(lx - 28, legendY, 5, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = "#cbd5e1";
+    ctx.fillText(`${seg.count} ${seg.label.split(" ")[0]}`, lx + 5, legendY + 1);
+  });
+}
+
+function drawNativeRadarChart() {
+  const canvas = document.getElementById("analyticsRadarChart");
+  if (!canvas) return;
+
+  const parent = canvas.parentElement;
+  const width = (parent ? parent.clientWidth : 500) || 500;
+  const height = 280;
+  const dpr = window.devicePixelRatio || 1;
+
+  canvas.width = width * dpr;
+  canvas.height = height * dpr;
+  canvas.style.width = width + "px";
+  canvas.style.height = height + "px";
+
+  const ctx = canvas.getContext("2d");
+  ctx.scale(dpr, dpr);
+
+  const labels = ["Algorithm Design", "Code Quality", "Cloud Infra", "Debugging Speed", "Lab Attendance", "Assessments"];
+  const values = [88, 82, 85, 79, 88.5, 84];
+  const numAxes = labels.length;
+
+  const centerX = width / 2;
+  const centerY = height / 2 + 5;
+  const maxR = Math.min(centerX, centerY) - 45;
+
+  // Draw concentric webs
+  [0.4, 0.6, 0.8, 1.0].forEach(level => {
+    ctx.beginPath();
+    for (let i = 0; i < numAxes; i++) {
+      const angle = (i / numAxes) * (Math.PI * 2) - Math.PI / 2;
+      const x = centerX + Math.cos(angle) * (maxR * level);
+      const y = centerY + Math.sin(angle) * (maxR * level);
+      if (i === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  });
+
+  // Draw axis spokes
+  for (let i = 0; i < numAxes; i++) {
+    const angle = (i / numAxes) * (Math.PI * 2) - Math.PI / 2;
+    const x = centerX + Math.cos(angle) * maxR;
+    const y = centerY + Math.sin(angle) * maxR;
+    ctx.beginPath();
+    ctx.moveTo(centerX, centerY);
+    ctx.lineTo(x, y);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.stroke();
+
+    // Axis label
+    const lx = centerX + Math.cos(angle) * (maxR + 24);
+    const ly = centerY + Math.sin(angle) * (maxR + 15);
+    ctx.font = "10px 'Plus Jakarta Sans', sans-serif";
+    ctx.fillStyle = "#94a3b8";
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    ctx.fillText(labels[i], lx, ly);
+  }
+
+  // Draw Data Polygon
+  ctx.beginPath();
+  for (let i = 0; i < numAxes; i++) {
+    const angle = (i / numAxes) * (Math.PI * 2) - Math.PI / 2;
+    const r = (values[i] / 100) * maxR;
+    const x = centerX + Math.cos(angle) * r;
+    const y = centerY + Math.sin(angle) * r;
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = "rgba(139, 92, 246, 0.3)";
+  ctx.fill();
+  ctx.strokeStyle = "#8b5cf6";
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Draw Data Points
+  for (let i = 0; i < numAxes; i++) {
+    const angle = (i / numAxes) * (Math.PI * 2) - Math.PI / 2;
+    const r = (values[i] / 100) * maxR;
+    const x = centerX + Math.cos(angle) * r;
+    const y = centerY + Math.sin(angle) * r;
+    ctx.fillStyle = "#8b5cf6";
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function renderNativeCharts() {
+  const timeframeSelect = document.getElementById("chartTimeframeSelect");
+  const mode = timeframeSelect ? timeframeSelect.value : "weekly";
+  drawNativeAttendanceTrend(mode);
+  drawNativeBatchPerformance();
+  drawNativeComparisonChart();
+  drawNativeRiskDoughnut();
+  drawNativeRadarChart();
+}
+
+function initChartJsCharts() {
   Chart.defaults.color = "#94a3b8";
   Chart.defaults.font.family = "'Plus Jakarta Sans', sans-serif";
 
-  // Chart 1: Dashboard Attendance Trend
+  // Chart 1: Attendance Trend
   const ctxAttendance = document.getElementById("attendanceTrendChart");
   if (ctxAttendance) {
     chartInstances.attendanceTrend = new Chart(ctxAttendance, {
@@ -784,17 +1522,7 @@ function initCharts() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: {
-            position: "top",
-            labels: { boxWidth: 12, usePointStyle: true }
-          },
-          tooltip: {
-            backgroundColor: "#111827",
-            borderColor: "rgba(139, 92, 246, 0.4)",
-            borderWidth: 1,
-            titleColor: "#fff",
-            bodyColor: "#cbd5e1"
-          }
+          legend: { position: "top", labels: { boxWidth: 12, usePointStyle: true } }
         },
         scales: {
           y: {
@@ -803,15 +1531,13 @@ function initCharts() {
             grid: { color: "rgba(255, 255, 255, 0.05)" },
             ticks: { callback: val => val + "%" }
           },
-          x: {
-            grid: { color: "rgba(255, 255, 255, 0.05)" }
-          }
+          x: { grid: { color: "rgba(255, 255, 255, 0.05)" } }
         }
       }
     });
   }
 
-  // Chart 2: Batch Performance Breakdown (Bar)
+  // Chart 2: Batch Performance
   const ctxBatch = document.getElementById("batchPerformanceChart");
   if (ctxBatch) {
     chartInstances.batchPerformance = new Chart(ctxBatch, {
@@ -837,55 +1563,7 @@ function initCharts() {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: "#111827",
-            titleColor: "#fff",
-            callbacks: { label: ctx => `Score: ${ctx.raw}%` }
-          }
-        },
-        scales: {
-          y: {
-            min: 50,
-            max: 100,
-            grid: { color: "rgba(255, 255, 255, 0.05)" },
-            ticks: { callback: val => val + "%" }
-          },
-          x: {
-            grid: { display: false }
-          }
-        }
-      }
-    });
-  }
-
-  // Chart 3: Performance View (Theory vs Practical Grouped Bar)
-  const ctxComp = document.getElementById("analyticsComparisonChart");
-  if (ctxComp) {
-    chartInstances.analyticsComparison = new Chart(ctxComp, {
-      type: "bar",
-      data: {
-        labels: ["AI & ML", "Python FS", "Cloud DevOps", "Cyber Security"],
-        datasets: [
-          {
-            label: "Theory Exams",
-            data: [84, 82, 86, 89],
-            backgroundColor: "rgba(99, 102, 241, 0.75)",
-            borderRadius: 6
-          },
-          {
-            label: "Hands-on Practical Labs",
-            data: [89, 85, 91, 92],
-            backgroundColor: "rgba(139, 92, 246, 0.75)",
-            borderRadius: 6
-          }
-        ]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: { position: "top", labels: { boxWidth: 12 } }
+          legend: { display: false }
         },
         scales: {
           y: {
@@ -900,7 +1578,31 @@ function initCharts() {
     });
   }
 
-  // Chart 4: Risk Distribution Doughnut
+  // Chart 3: Analytics Comparison
+  const ctxComp = document.getElementById("analyticsComparisonChart");
+  if (ctxComp) {
+    chartInstances.analyticsComparison = new Chart(ctxComp, {
+      type: "bar",
+      data: {
+        labels: ["AI & ML", "Python FS", "Cloud DevOps", "Cyber Security"],
+        datasets: [
+          { label: "Theory Exams", data: [84, 82, 86, 89], backgroundColor: "rgba(99, 102, 241, 0.75)", borderRadius: 6 },
+          { label: "Hands-on Practical Labs", data: [89, 85, 91, 92], backgroundColor: "rgba(139, 92, 246, 0.75)", borderRadius: 6 }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { position: "top", labels: { boxWidth: 12 } } },
+        scales: {
+          y: { min: 50, max: 100, grid: { color: "rgba(255, 255, 255, 0.05)" }, ticks: { callback: val => val + "%" } },
+          x: { grid: { display: false } }
+        }
+      }
+    });
+  }
+
+  // Chart 4: Risk Doughnut
   const ctxRisk = document.getElementById("analyticsRiskDoughnutChart");
   if (ctxRisk) {
     chartInstances.analyticsRisk = new Chart(ctxRisk, {
@@ -909,12 +1611,12 @@ function initCharts() {
         labels: ["Safe (>85%)", "Moderate (75-84%)", "Critical (<75%)"],
         datasets: [
           {
-            data: [18, 3, 3],
-            backgroundColor: [
-              "#10b981", // Emerald
-              "#f59e0b", // Amber
-              "#f43f5e"  // Rose
+            data: [
+              appState.students.filter(s => s.riskLevel === "Safe").length,
+              appState.students.filter(s => s.riskLevel === "Moderate").length,
+              appState.students.filter(s => s.riskLevel === "Critical").length
             ],
+            backgroundColor: ["#10b981", "#f59e0b", "#f43f5e"],
             borderColor: "#0b101f",
             borderWidth: 3,
             hoverOffset: 6
@@ -924,15 +1626,13 @@ function initCharts() {
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        plugins: {
-          legend: { position: "bottom", labels: { boxWidth: 12, padding: 15 } }
-        },
+        plugins: { legend: { position: "bottom", labels: { boxWidth: 12, padding: 15 } } },
         cutout: "68%"
       }
     });
   }
 
-  // Chart 5: Skill Mastery Radar Chart
+  // Chart 5: Radar
   const ctxRadar = document.getElementById("analyticsRadarChart");
   if (ctxRadar) {
     chartInstances.analyticsRadar = new Chart(ctxRadar, {
@@ -969,48 +1669,67 @@ function initCharts() {
             ticks: { display: false, min: 40, max: 100 }
           }
         },
-        plugins: {
-          legend: { position: "top", labels: { boxWidth: 12 } }
-        }
+        plugins: { legend: { position: "top", labels: { boxWidth: 12 } } }
       }
     });
   }
 }
 
+function initCharts() {
+  let chartJsAvailable = false;
+  try {
+    if (typeof Chart !== "undefined" && typeof Chart === "function") {
+      chartJsAvailable = true;
+    }
+  } catch (e) {
+    chartJsAvailable = false;
+  }
+
+  if (chartJsAvailable) {
+    try {
+      initChartJsCharts();
+      useNativeCharts = false;
+      return;
+    } catch (err) {
+      console.warn("Chart.js init failed, switching to native canvas charts:", err);
+    }
+  }
+
+  useNativeCharts = true;
+  renderNativeCharts();
+}
+
 function updateChartData() {
-  if (!chartInstances.batchPerformance) return;
+  if (useNativeCharts) {
+    renderNativeCharts();
+    return;
+  }
 
-  // Compute batch scores dynamically from current students
-  const batchAverages = {};
-  DEFAULT_BATCHES.forEach(b => {
-    const studentsInBatch = appState.students.filter(s => s.batch === b.name);
-    const avg = studentsInBatch.length > 0 
-      ? (studentsInBatch.reduce((acc, curr) => acc + Number(curr.score), 0) / studentsInBatch.length).toFixed(1)
-      : 80;
-    batchAverages[b.name] = Number(avg);
-  });
+  if (chartInstances.batchPerformance) {
+    const batches = ["AI & Machine Learning", "Full Stack Python", "Cloud DevOps & AWS", "Cyber Security & SOC"];
+    const scores = batches.map(bName => {
+      const inB = appState.students.filter(s => s.batch === bName);
+      return inB.length > 0 
+        ? Math.round((inB.reduce((sum, s) => sum + Number(s.score || 80), 0) / inB.length) * 10) / 10 
+        : 85;
+    });
 
-  chartInstances.batchPerformance.data.datasets[0].data = [
-    batchAverages["AI & Machine Learning"] || 85,
-    batchAverages["Full Stack Python"] || 82,
-    batchAverages["Cloud DevOps & AWS"] || 88,
-    batchAverages["Cyber Security & SOC"] || 90
-  ];
-  chartInstances.batchPerformance.update();
+    chartInstances.batchPerformance.data.datasets[0].data = scores;
+    chartInstances.batchPerformance.update();
+  }
 
-  // Update Risk Doughnut
   if (chartInstances.analyticsRisk) {
-    const safeCount = appState.students.filter(s => s.riskLevel === "Safe").length;
-    const moderateCount = appState.students.filter(s => s.riskLevel === "Moderate").length;
-    const criticalCount = appState.students.filter(s => s.riskLevel === "Critical").length;
-
-    chartInstances.analyticsRisk.data.datasets[0].data = [safeCount, moderateCount, criticalCount];
+    chartInstances.analyticsRisk.data.datasets[0].data = [
+      appState.students.filter(s => s.riskLevel === "Safe").length,
+      appState.students.filter(s => s.riskLevel === "Moderate").length,
+      appState.students.filter(s => s.riskLevel === "Critical").length
+    ];
     chartInstances.analyticsRisk.update();
   }
 }
 
 // ============================================================================
-// 4. VIEW RENDERING & LOGIC
+// 4. VIEW RENDERING & CONTROLLER LOGIC
 // ============================================================================
 
 // --- View 1: Dashboard Overview ---
@@ -1020,65 +1739,85 @@ function renderDashboard() {
   const activeBatches = appState.batches.length;
 
   const avgAttendance = totalStudents > 0
-    ? (appState.students.reduce((acc, curr) => acc + Number(curr.attendance), 0) / totalStudents).toFixed(1)
-    : "0.0";
+    ? (appState.students.reduce((acc, curr) => acc + Number(curr.attendance || 85), 0) / totalStudents).toFixed(1)
+    : "88.5";
 
-  // Update Hero Metric Cards (Req 2)
-  document.getElementById("kpiTotalStudents").textContent = totalStudents;
-  document.getElementById("sidebarStudentCount").textContent = totalStudents;
-  document.getElementById("kpiTotalTrainers").textContent = totalTrainers;
-  document.getElementById("sidebarTrainerCount").textContent = totalTrainers;
-  document.getElementById("kpiAttendanceRate").textContent = avgAttendance + "%";
-  document.getElementById("kpiAttendanceBar").style.width = avgAttendance + "%";
-  document.getElementById("kpiActiveBatches").textContent = activeBatches;
+  // Update Hero Metric Cards
+  const kpiTotalStudents = document.getElementById("kpiTotalStudents");
+  const sidebarStudentCount = document.getElementById("sidebarStudentCount");
+  const kpiTotalTrainers = document.getElementById("kpiTotalTrainers");
+  const sidebarTrainerCount = document.getElementById("sidebarTrainerCount");
+  const kpiAttendanceRate = document.getElementById("kpiAttendanceRate");
+  const kpiAttendanceBar = document.getElementById("kpiAttendanceBar");
+  const kpiActiveBatches = document.getElementById("kpiActiveBatches");
 
-  // AI High-Risk Watchlist Widget
+  if (kpiTotalStudents) kpiTotalStudents.textContent = totalStudents;
+  if (sidebarStudentCount) sidebarStudentCount.textContent = totalStudents;
+  if (kpiTotalTrainers) kpiTotalTrainers.textContent = totalTrainers;
+  if (sidebarTrainerCount) sidebarTrainerCount.textContent = totalTrainers;
+  if (kpiAttendanceRate) kpiAttendanceRate.textContent = avgAttendance + "%";
+  if (kpiAttendanceBar) kpiAttendanceBar.style.width = avgAttendance + "%";
+  if (kpiActiveBatches) kpiActiveBatches.textContent = activeBatches;
+
+  // AI High-Risk Watchlist
   const criticalStudents = appState.students.filter(s => s.riskLevel === "Critical");
   const moderateStudents = appState.students.filter(s => s.riskLevel === "Moderate");
-  const totalAtRisk = criticalStudents.length + moderateStudents.length;
 
-  // Update Badge in sidebar & Alert Banner
-  document.getElementById("sidebarAlertCount").textContent = criticalStudents.length;
+  const alertBadge = document.getElementById("sidebarAlertCount");
+  if (alertBadge) alertBadge.textContent = criticalStudents.length;
+
   const aiBanner = document.getElementById("dashboardAiBanner");
-  if (criticalStudents.length > 0) {
-    aiBanner.style.display = "flex";
-    document.getElementById("bannerAlertTitle").textContent = 
-      `${criticalStudents.length} Students Identified as At-Risk of Dropping Out`;
-    document.getElementById("bannerAlertSubtitle").textContent = 
-      `Apex AI detected abnormal attendance drops (<75%) and lagging test performance in ${criticalStudents.map(s => s.batch.split(' ')[0]).filter((v, i, a) => a.indexOf(v) === i).join(', ')} batches.`;
-  } else {
-    aiBanner.style.display = "none";
+  if (aiBanner) {
+    if (criticalStudents.length > 0) {
+      aiBanner.style.display = "flex";
+      const bannerTitle = document.getElementById("bannerAlertTitle");
+      const bannerSubtitle = document.getElementById("bannerAlertSubtitle");
+      if (bannerTitle) {
+        bannerTitle.textContent = `${criticalStudents.length} Students Identified as At-Risk of Dropping Out`;
+      }
+      if (bannerSubtitle) {
+        bannerSubtitle.textContent = `Apex AI detected abnormal attendance drops (<75%) and lagging test performance in ${criticalStudents.map(s => s.batch.split(' ')[0]).filter((v, i, a) => a.indexOf(v) === i).join(', ')} batches.`;
+      }
+    } else {
+      aiBanner.style.display = "none";
+    }
   }
 
   // Populate Dashboard Watchlist
   const watchlistContainer = document.getElementById("dashboardRiskWatchlist");
   if (watchlistContainer) {
-    if (criticalStudents.length === 0) {
+    const atRisk = [...criticalStudents, ...moderateStudents];
+    if (atRisk.length === 0) {
       watchlistContainer.innerHTML = `
         <div class="empty-state-notice" style="padding: 1.5rem; text-align: center; color: var(--text-dim);">
           <i class="fa-solid fa-circle-check text-emerald" style="font-size: 1.8rem; margin-bottom: 0.5rem; display: block;"></i>
-          All enrolled students currently meet attendance and progress thresholds!
+          All enrolled students currently meet attendance and progress compliance thresholds!
         </div>
       `;
     } else {
-      watchlistContainer.innerHTML = criticalStudents.slice(0, 4).map(s => `
-        <div class="watchlist-item">
-          <div class="watchlist-profile">
-            <div class="student-avatar-initials">${getInitials(s.name)}</div>
-            <div>
-              <div class="watchlist-name">${escapeHTML(s.name)}</div>
-              <div class="watchlist-batch">${escapeHTML(s.batch)} • Trainer: ${escapeHTML(s.trainer.split(' ')[1] || s.trainer)}</div>
+      watchlistContainer.innerHTML = atRisk.slice(0, 5).map(s => {
+        const isCrit = s.riskLevel === "Critical";
+        return `
+          <div class="watchlist-item">
+            <div class="watchlist-profile">
+              <div class="student-avatar-initials">${getInitials(s.name)}</div>
+              <div>
+                <div class="watchlist-name">${escapeHTML(s.name)}</div>
+                <div class="watchlist-batch">${escapeHTML(s.batch)} • Trainer: ${escapeHTML((s.trainer || "").split(' ')[1] || s.trainer || "Faculty")}</div>
+              </div>
             </div>
+            <div class="watchlist-metrics">
+              <div class="watchlist-metric-val" style="color: ${isCrit ? 'var(--rose)' : 'var(--amber)'}; font-family: 'JetBrains Mono'; font-weight: 800;">
+                ${s.attendance}% Attn
+              </div>
+              <div class="watchlist-metric-lbl">Score: ${s.score}% • ${isCrit ? '<span class="badge badge-danger">Critical</span>' : '<span class="badge badge-warning">Moderate</span>'}</div>
+            </div>
+            <button class="btn btn-sm btn-secondary" onclick="openStudentModal('${s.id}')">
+              <i class="fa-solid fa-eye"></i> Profile
+            </button>
           </div>
-          <div class="watchlist-metrics">
-            <div class="watchlist-metric-val">${s.attendance}% Attn</div>
-            <div class="watchlist-metric-lbl">Score: ${s.score}% • Critical</div>
-          </div>
-          <button class="btn btn-sm btn-secondary" onclick="openStudentModal('${s.id}')">
-            <i class="fa-solid fa-eye"></i> Profile
-          </button>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
   }
 
@@ -1097,14 +1836,16 @@ function renderDashboard() {
         </div>
         <div style="display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--text-dim); margin-top: 0.25rem;">
           <span>Module: ${escapeHTML(b.currentModule)}</span>
-          <span style="color: var(--cyan);">${b.progress}% Syllabus Complete</span>
+          <span style="color: var(--cyan); font-weight: 600;">${b.progress}% Syllabus Complete</span>
         </div>
       </div>
     `).join('');
   }
+
+  updateChartData();
 }
 
-// --- View 2: Students Directory (Requirement 4) ---
+// --- View 2: Students Directory ---
 function renderStudentsTable() {
   const tableBody = document.getElementById("studentsTableBody");
   if (!tableBody) return;
@@ -1126,8 +1867,10 @@ function renderStudentsTable() {
     return matchesSearch && matchesBatch && matchesRisk;
   });
 
-  document.getElementById("studentTableCount").textContent = 
-    `Showing ${filtered.length} of ${appState.students.length} trainees`;
+  const countElem = document.getElementById("studentTableCount");
+  if (countElem) {
+    countElem.textContent = `Showing ${filtered.length} of ${appState.students.length} trainees`;
+  }
 
   if (filtered.length === 0) {
     tableBody.innerHTML = `
@@ -1188,7 +1931,7 @@ function renderStudentsTable() {
         <td>${riskBadge}</td>
         <td class="text-right">
           <div class="table-action-btns">
-            <button class="action-icon-btn" title="View AI Profile" onclick="openStudentModal('${student.id}')">
+            <button class="action-icon-btn" title="View Profile & Diagnostics" onclick="openStudentModal('${student.id}')">
               <i class="fa-regular fa-id-badge"></i>
             </button>
             <button class="action-icon-btn" title="Toggle Today Attendance" onclick="quickToggleAttendance('${student.id}')">
@@ -1266,7 +2009,7 @@ function filterByTrainerBatch(batchName) {
   }
 }
 
-// --- View 4: Attendance Management (Requirement 5) ---
+// --- View 4: Attendance Management ---
 function renderAttendanceTable() {
   const targetBatch = document.getElementById("attendanceBatchSelect")?.value || "AI & Machine Learning";
   const tbody = document.getElementById("attendanceTableBody");
@@ -1274,16 +2017,20 @@ function renderAttendanceTable() {
 
   const batchStudents = appState.students.filter(s => s.batch === targetBatch);
 
-  // Compute stats for current batch
   const total = batchStudents.length;
   const presentCount = batchStudents.filter(s => s.todayAttendance === "present").length;
   const absentCount = total - presentCount;
   const rate = total > 0 ? ((presentCount / total) * 100).toFixed(0) : 0;
 
-  document.getElementById("attendStatTotal").textContent = total;
-  document.getElementById("attendStatPresent").textContent = presentCount;
-  document.getElementById("attendStatAbsent").textContent = absentCount;
-  document.getElementById("attendStatRate").textContent = rate + "%";
+  const totalElem = document.getElementById("attendStatTotal");
+  const presElem = document.getElementById("attendStatPresent");
+  const absElem = document.getElementById("attendStatAbsent");
+  const rateElem = document.getElementById("attendStatRate");
+
+  if (totalElem) totalElem.textContent = total;
+  if (presElem) presElem.textContent = presentCount;
+  if (absElem) absElem.textContent = absentCount;
+  if (rateElem) rateElem.textContent = rate + "%";
 
   if (batchStudents.length === 0) {
     tbody.innerHTML = `
@@ -1325,7 +2072,6 @@ function renderAttendanceTable() {
           }
         </td>
         <td class="text-center">
-          <!-- Requirement 5: Interactive Present and Absent options -->
           <div class="attendance-toggle-group">
             <button 
               type="button" 
@@ -1375,9 +2121,7 @@ function markAllInBatch(status) {
 function saveCurrentBatchAttendance() {
   const targetBatch = document.getElementById("attendanceBatchSelect").value;
   const dateVal = document.getElementById("attendanceDatePicker").value || "Today";
-  const topic = document.getElementById("attendanceSessionTopic").value || "Practical Lab";
 
-  // Re-evaluate attendance % and risk adjustments dynamically
   appState.students.forEach(s => {
     if (s.batch === targetBatch) {
       if (s.todayAttendance === "absent") {
@@ -1399,13 +2143,610 @@ function saveCurrentBatchAttendance() {
   showToast(`Attendance saved for ${targetBatch} (${dateVal})! AI models updated.`, "success");
 }
 
-// --- View 6: AI Insights & Alerts (Requirement 7) ---
+// ============================================================================
+// 4B. PERFORMANCE & 4 SEPARATE COURSES CONTROLLER (Req 5 & 6)
+// Courses: AI Fundamentals, Web Development, Python Programming, Data Analytics
+// ============================================================================
+
+let activeDetailCourse = null;
+let perfSearchQuery = "";
+let perfCourseFilterVal = "all";
+let perfStatusFilterVal = "all";
+
+// LEVEL 1: Renders the 4 Separate Course Cards on Main Performance Dashboard
+function renderCourseDashboard() {
+  const grid = document.getElementById("courseCardsGrid");
+  if (!grid) return;
+
+  const cardsHtml = CORE_COURSES.map(courseName => {
+    const enrolledStudents = appState.students.filter(s =>
+      s.courses && s.courses.some(c => c.courseName === courseName)
+    );
+    let totalScore = 0;
+    let gradeCounts = { "A+": 0, "A": 0, "B": 0, "C": 0, "D": 0, "F": 0 };
+
+    enrolledStudents.forEach(s => {
+      const c = s.courses.find(item => item.courseName === courseName);
+      const total = c.totalMarks || 100;
+      const pct = Math.round((c.marksObtained / total) * 100);
+      totalScore += pct;
+      const g = getGrade(pct).grade;
+      if (gradeCounts[g] !== undefined) gradeCounts[g]++;
+    });
+
+    const avg = enrolledStudents.length > 0 ? (totalScore / enrolledStudents.length).toFixed(1) : "0.0";
+    const iconClass = getCourseIcon(courseName);
+    const desc = COURSE_DESCRIPTIONS[courseName] || "Core curriculum subject";
+
+    let themeClass = "course-theme-ai";
+    if (courseName === "Web Development") themeClass = "course-theme-web";
+    else if (courseName === "Python Programming") themeClass = "course-theme-python";
+    else if (courseName === "Data Analytics") themeClass = "course-theme-data";
+
+    return `
+      <div class="course-dashboard-card card ${themeClass}" onclick="openCoursePerformance('${escapeHTML(courseName)}')" style="cursor: pointer;" title="Click to view ${escapeHTML(courseName)} students, marks & grades">
+        <div class="course-card-top">
+          <div class="course-card-icon-wrap">
+            <i class="${iconClass}"></i>
+          </div>
+          <span class="course-card-badge badge badge-primary">
+            <i class="fa-solid fa-calculator"></i> Avg: ${avg}%
+          </span>
+        </div>
+        <div class="course-card-info">
+          <h4>${escapeHTML(courseName)}</h4>
+          <p class="course-card-desc">${desc}</p>
+        </div>
+        <div class="course-card-metrics">
+          <div>
+            <span class="course-metric-label">Enrolled Trainees</span>
+            <span class="course-metric-val">${enrolledStudents.length} Students</span>
+          </div>
+          <div>
+            <span class="course-metric-label">Course Average</span>
+            <span class="course-metric-val" style="color: var(--cyan);">${avg}%</span>
+          </div>
+        </div>
+        <div style="font-size: 0.74rem; color: var(--text-dim); margin-top: 0.5rem; display: flex; gap: 0.4rem; flex-wrap: wrap;">
+          <span class="badge badge-purple">A+: ${gradeCounts["A+"]}</span>
+          <span class="badge badge-success">A: ${gradeCounts["A"]}</span>
+          <span class="badge badge-primary">B: ${gradeCounts["B"]}</span>
+          ${(gradeCounts["C"] + gradeCounts["D"] + gradeCounts["F"]) > 0 ? `<span class="badge badge-warning">C/D/F: ${gradeCounts["C"] + gradeCounts["D"] + gradeCounts["F"]}</span>` : ''}
+        </div>
+        <div class="course-card-footer" style="margin-top: 0.75rem;">
+          <span>View Students, Marks & Grades</span>
+          <i class="fa-solid fa-arrow-right"></i>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  grid.innerHTML = cardsHtml;
+}
+
+// LEVEL 2: Opens dedicated course performance view displaying ONLY that course's students, marks, grades, and average score
+function openCoursePerformance(courseName) {
+  activeDetailCourse = courseName;
+  const mainView = document.getElementById("perfDashboardMain");
+  const detailView = document.getElementById("perfCourseDetailView");
+  if (mainView && detailView) {
+    mainView.style.display = "none";
+    detailView.style.display = "block";
+  }
+
+  const titleElem = document.getElementById("courseDetailTitle");
+  const subtitleElem = document.getElementById("courseDetailSubtitle");
+  const iconBoxElem = document.getElementById("courseDetailIconBox");
+
+  if (titleElem) titleElem.textContent = courseName;
+  if (subtitleElem) subtitleElem.textContent = `Individual marks, automatic letter grades, and average score for ${courseName}`;
+  if (iconBoxElem) {
+    iconBoxElem.innerHTML = `<i class="${getCourseIcon(courseName)}" id="courseDetailIcon"></i>`;
+  }
+
+  // Calculate course stats
+  const enrolledStudents = appState.students.filter(s =>
+    s.courses && s.courses.some(c => c.courseName === courseName)
+  );
+
+  let totalScore = 0;
+  let passCount = 0;
+
+  enrolledStudents.forEach(s => {
+    const c = s.courses.find(item => item.courseName === courseName);
+    const total = c.totalMarks || 100;
+    const pct = (c.marksObtained / total) * 100;
+    totalScore += pct;
+    if (pct >= 50) passCount++;
+  });
+
+  const avg = enrolledStudents.length > 0 ? (totalScore / enrolledStudents.length).toFixed(1) : "0.0";
+  const passRate = enrolledStudents.length > 0 ? Math.round((passCount / enrolledStudents.length) * 100) : 0;
+
+  const countElem = document.getElementById("courseDetailEnrolledCount");
+  const avgElem = document.getElementById("courseDetailAvgScore");
+  const passElem = document.getElementById("courseDetailPassRate");
+
+  if (countElem) countElem.textContent = `${enrolledStudents.length} Students`;
+  if (avgElem) avgElem.textContent = `${avg}%`;
+  if (passElem) passElem.textContent = `${passRate}%`;
+
+  const searchInput = document.getElementById("courseDetailStudentSearch");
+  const statusFilter = document.getElementById("courseDetailStatusFilter");
+  if (searchInput) searchInput.value = "";
+  if (statusFilter) statusFilter.value = "all";
+
+  renderCourseDetailStudents();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function backToPerformanceDashboard() {
+  const mainView = document.getElementById("perfDashboardMain");
+  const detailView = document.getElementById("perfCourseDetailView");
+  if (mainView && detailView) {
+    detailView.style.display = "none";
+    mainView.style.display = "block";
+  }
+  activeDetailCourse = null;
+  renderPerformanceSection();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function clearCourseDetailFilters() {
+  const searchInput = document.getElementById("courseDetailStudentSearch");
+  const statusFilter = document.getElementById("courseDetailStatusFilter");
+  if (searchInput) searchInput.value = "";
+  if (statusFilter) statusFilter.value = "all";
+  renderCourseDetailStudents();
+  showToast("Course filters reset.", "info");
+}
+
+function handleCourseCardClick(courseName) {
+  openCoursePerformance(courseName);
+}
+
+// Renders the students inside the dedicated Level 2 view
+function renderCourseDetailStudents() {
+  const container = document.getElementById("courseStudentsGrid");
+  if (!container || !activeDetailCourse) return;
+
+  const searchInput = document.getElementById("courseDetailStudentSearch");
+  const statusFilter = document.getElementById("courseDetailStatusFilter");
+  const query = (searchInput ? searchInput.value : "").trim().toLowerCase();
+  const statusVal = statusFilter ? statusFilter.value : "all";
+
+  let students = appState.students.filter(s =>
+    s.courses && s.courses.some(c => c.courseName === activeDetailCourse)
+  );
+
+  if (query) {
+    students = students.filter(s =>
+      s.name.toLowerCase().includes(query) ||
+      s.id.toLowerCase().includes(query) ||
+      s.batch.toLowerCase().includes(query)
+    );
+  }
+
+  if (statusVal !== "all") {
+    students = students.filter(s => {
+      const c = s.courses.find(item => item.courseName === activeDetailCourse);
+      const total = c.totalMarks || 100;
+      const pct = Math.round((c.marksObtained / total) * 100);
+      return getPerformanceStatus(pct).status === statusVal;
+    });
+  }
+
+  const countBadge = document.getElementById("courseDetailResultsCount");
+  if (countBadge) {
+    countBadge.textContent = `Showing ${students.length} of ${appState.students.length} Students`;
+  }
+
+  if (students.length === 0) {
+    container.innerHTML = `
+      <div class="perf-empty-state" style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: var(--text-dim);">
+        <i class="fa-solid fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; color: var(--text-dim);"></i>
+        <h4>No Student Records Found</h4>
+        <p>No student in ${escapeHTML(activeDetailCourse)} matches the active filters.</p>
+        <button class="btn btn-primary" onclick="clearCourseDetailFilters()">
+          <i class="fa-solid fa-arrow-rotate-left"></i> Reset Search & Filters
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  container.innerHTML = students.map(s => {
+    const course = s.courses.find(c => c.courseName === activeDetailCourse);
+    const totalMarks = course.totalMarks || 100;
+    const marksObtained = course.marksObtained;
+    const pct = Math.round((marksObtained / totalMarks) * 100);
+    const grade = getGrade(pct);
+    const status = getPerformanceStatus(pct);
+
+    return `
+      <div class="course-student-card">
+        <div class="course-student-header">
+          <div class="course-student-info">
+            <div class="course-student-avatar">${getInitials(s.name)}</div>
+            <div class="course-student-name-box">
+              <h4>${escapeHTML(s.name)}</h4>
+              <div style="font-size: 0.78rem; color: var(--text-muted); margin-top: 0.15rem;">
+                <span class="table-code">${escapeHTML(s.id)}</span> • ${escapeHTML(s.batch)}
+              </div>
+            </div>
+          </div>
+          <span class="grade-badge ${grade.color}">${grade.label}</span>
+        </div>
+
+        <div class="course-marks-spotlight">
+          <div class="course-marks-metric-row">
+            <span class="course-title-sub">
+              <i class="${getCourseIcon(activeDetailCourse)}"></i> ${escapeHTML(activeDetailCourse)} Marks
+            </span>
+            <div class="marks-data-cluster">
+              <span class="num-obtained">${marksObtained}</span>
+              <span class="num-separator">/</span>
+              <span class="num-total">${totalMarks}</span>
+              <span class="num-percent">(${pct}%)</span>
+            </div>
+          </div>
+          <div class="perf-progress-wrap" title="Score: ${pct}%">
+            <div class="perf-progress-track">
+              <div class="perf-progress-fill ${status.fillClass}" style="width: ${pct}%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="course-student-footer-meta">
+          <span class="status-badge ${status.statusClass}">
+            <i class="${status.icon}"></i> ${status.status}
+          </span>
+          <button class="btn btn-sm btn-outline" onclick="openAddMarksModal('${s.id}', '${escapeHTML(activeDetailCourse)}')">
+            <i class="fa-solid fa-pen-to-square"></i> Update Marks
+          </button>
+        </div>
+      </div>
+    `;
+  }).join("");
+}
+
+// LEVEL 1: Renders the full Performance Section (KPI Highlights + Course Cards + Directory)
+function renderPerformanceSection() {
+  renderCourseDashboard();
+
+  const gridContainer = document.getElementById("studentPerformanceGrid");
+  if (!gridContainer) return;
+
+  const searchInput = document.getElementById("perfStudentSearch");
+  const courseFilter = document.getElementById("perfCourseFilter");
+  const statusFilter = document.getElementById("perfStatusFilter");
+  const countBadge = document.getElementById("perfResultsCount");
+
+  if (searchInput) perfSearchQuery = searchInput.value.trim().toLowerCase();
+  if (courseFilter) perfCourseFilterVal = courseFilter.value;
+  if (statusFilter) perfStatusFilterVal = statusFilter.value;
+
+  // Compute KPI summary stats
+  const totalStudents = appState.students.length;
+  let allPercentages = [];
+  let topStudent = null;
+  let topStudentAvg = -1;
+
+  appState.students.forEach(s => {
+    if (s.courses && s.courses.length > 0) {
+      const studentAvg = s.courses.reduce((sum, c) => sum + ((c.marksObtained / (c.totalMarks || 100)) * 100), 0) / s.courses.length;
+      allPercentages.push(studentAvg);
+      if (studentAvg > topStudentAvg) {
+        topStudentAvg = studentAvg;
+        topStudent = s;
+      }
+    }
+  });
+
+  const overallAvg = allPercentages.length > 0 ? (allPercentages.reduce((a, b) => a + b, 0) / allPercentages.length).toFixed(1) : "0.0";
+
+  const statStudentsElem = document.getElementById("perfStatTotalStudents");
+  const statAvgElem = document.getElementById("perfStatAvgPercentage");
+  const statCoursesElem = document.getElementById("perfStatTotalCourses");
+  const statTopElem = document.getElementById("perfStatTopPerformer");
+
+  if (statStudentsElem) statStudentsElem.textContent = totalStudents;
+  if (statAvgElem) statAvgElem.textContent = `${overallAvg}%`;
+  if (statCoursesElem) statCoursesElem.textContent = CORE_COURSES.length;
+  if (statTopElem) statTopElem.textContent = topStudent ? `${topStudent.name} (${Math.round(topStudentAvg)}%)` : "--";
+
+  // Filter Students for Level 1 Grid
+  const filteredStudents = appState.students.filter(student => {
+    if (perfSearchQuery && !student.name.toLowerCase().includes(perfSearchQuery)) {
+      return false;
+    }
+
+    if (perfCourseFilterVal !== "all") {
+      const hasCourse = student.courses && student.courses.some(c => c.courseName === perfCourseFilterVal);
+      if (!hasCourse) return false;
+    }
+
+    if (perfStatusFilterVal !== "all") {
+      const hasStatus = student.courses && student.courses.some(c => {
+        const pct = Math.round((c.marksObtained / (c.totalMarks || 100)) * 100);
+        return getPerformanceStatus(pct).status === perfStatusFilterVal;
+      });
+      if (!hasStatus) return false;
+    }
+
+    return true;
+  });
+
+  if (countBadge) {
+    countBadge.textContent = `Showing ${filteredStudents.length} of ${totalStudents} Students`;
+  }
+
+  if (filteredStudents.length === 0) {
+    gridContainer.innerHTML = `
+      <div class="perf-empty-state" style="grid-column: 1 / -1; padding: 2.5rem; text-align: center; color: var(--text-dim);">
+        <i class="fa-solid fa-user-slash" style="font-size: 2rem; margin-bottom: 0.5rem; display: block; color: var(--text-dim);"></i>
+        <h4>No Student Records Found</h4>
+        <p>No student matches the search "${escapeHTML(perfSearchQuery)}" or selected filters.</p>
+        <button class="btn btn-primary" onclick="clearPerformanceFilters()">
+          <i class="fa-solid fa-arrow-rotate-left"></i> Reset Search & Filters
+        </button>
+      </div>
+    `;
+    return;
+  }
+
+  // If a specific course filter is selected, prepend a Course Summary Bar
+  let courseHeaderHtml = "";
+  if (perfCourseFilterVal !== "all") {
+    const courseStudents = appState.students.filter(s =>
+      s.courses && s.courses.some(c => c.courseName === perfCourseFilterVal)
+    );
+    let cTotal = 0;
+    courseStudents.forEach(s => {
+      const c = s.courses.find(item => item.courseName === perfCourseFilterVal);
+      cTotal += (c.marksObtained / (c.totalMarks || 100)) * 100;
+    });
+    const cAvg = courseStudents.length > 0 ? (cTotal / courseStudents.length).toFixed(1) : "0.0";
+
+    courseHeaderHtml = `
+      <div class="card" style="grid-column: 1 / -1; margin-bottom: 0.5rem; border-color: var(--border-glow); background: rgba(99, 102, 241, 0.08); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; padding: 1rem 1.25rem;">
+        <div style="display: flex; align-items: center; gap: 0.85rem;">
+          <i class="${getCourseIcon(perfCourseFilterVal)}" style="font-size: 1.6rem;"></i>
+          <div>
+            <h4 style="color: #fff; margin: 0; font-size: 1.1rem;">Filtered Course: <strong>${escapeHTML(perfCourseFilterVal)}</strong></h4>
+            <span style="font-size: 0.82rem; color: var(--text-muted);">
+              Course Average Score: <strong style="color: var(--cyan); font-family: 'JetBrains Mono';">${cAvg}%</strong> • ${courseStudents.length} Students Enrolled
+            </span>
+          </div>
+        </div>
+        <button class="btn btn-sm btn-primary" onclick="openCoursePerformance('${escapeHTML(perfCourseFilterVal)}')">
+          <i class="fa-solid fa-arrow-up-right-from-square"></i> Open Dedicated Course View
+        </button>
+      </div>
+    `;
+  }
+
+  gridContainer.innerHTML = courseHeaderHtml + filteredStudents.map(student => {
+    let coursesToRender = student.courses || [];
+    if (perfCourseFilterVal !== "all") {
+      coursesToRender = coursesToRender.filter(c => c.courseName === perfCourseFilterVal);
+    }
+
+    const allStudentCourses = student.courses || [];
+    const studentAvgPct = allStudentCourses.length > 0 
+      ? Math.round(allStudentCourses.reduce((sum, c) => sum + ((c.marksObtained / (c.totalMarks || 100)) * 100), 0) / allStudentCourses.length)
+      : 0;
+    
+    const initials = getInitials(student.name);
+
+    const coursesHtml = coursesToRender.map(course => {
+      const totalMarks = course.totalMarks || 100;
+      const marksObtained = course.marksObtained;
+      const calculatedPercentage = totalMarks > 0 ? Math.round((marksObtained / totalMarks) * 100) : 0;
+      const gradeInfo = getGrade(calculatedPercentage);
+      const statusInfo = getPerformanceStatus(calculatedPercentage);
+      const courseIcon = getCourseIcon(course.courseName);
+
+      return `
+        <div class="course-perf-item">
+          <div class="course-perf-main">
+            <div class="course-name-col">
+              <i class="${courseIcon}"></i>
+              <span class="course-title">${escapeHTML(course.courseName)}</span>
+              <span class="grade-badge ${gradeInfo.color}" style="margin-left: 0.5rem; font-size: 0.75rem; padding: 0.15rem 0.5rem;">${gradeInfo.label}</span>
+            </div>
+            <div class="course-marks-col">
+              <div class="marks-display" title="Marks Obtained / Total Marks (Percentage)">
+                <span class="marks-obtained">${marksObtained}</span>
+                <span class="marks-separator">/</span>
+                <span class="marks-total">${totalMarks}</span>
+                <span class="marks-percentage">(${calculatedPercentage}%)</span>
+              </div>
+              <span class="status-badge ${statusInfo.statusClass}" title="Status: ${statusInfo.status}">
+                <i class="${statusInfo.icon}"></i> ${statusInfo.status}
+              </span>
+            </div>
+          </div>
+
+          <div class="perf-progress-wrap" title="${escapeHTML(course.courseName)}: ${calculatedPercentage}%">
+            <div class="perf-progress-track">
+              <div class="perf-progress-fill ${statusInfo.fillClass}" style="width: ${calculatedPercentage}%;"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    return `
+      <div class="student-perf-card card" id="perf-card-${escapeHTML(student.id)}">
+        <div class="student-perf-card-header">
+          <div class="student-perf-user-info">
+            <div class="student-avatar-badge">${initials}</div>
+            <div>
+              <div class="student-name-label">
+                Student Name: <span class="student-name-val">${escapeHTML(student.name)}</span>
+              </div>
+              <div class="student-submeta">
+                <span class="badge badge-outline"><i class="fa-solid fa-id-card"></i> ${escapeHTML(student.id)}</span>
+                <span class="badge badge-outline"><i class="fa-solid fa-layer-group"></i> ${escapeHTML(student.batch)}</span>
+                <button class="btn btn-sm btn-ghost" style="padding: 0.1rem 0.4rem; font-size: 0.72rem;" onclick="openAddMarksModal('${student.id}')" title="Add or edit course marks">
+                  <i class="fa-solid fa-plus-circle text-purple"></i> Add Marks
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="student-overall-summary">
+            <div class="overall-badge-pill">
+              <span class="overall-label">Courses: <strong>${allStudentCourses.length}</strong></span>
+              <span class="overall-avg">Average: <strong>${studentAvgPct}%</strong></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="student-courses-list">
+          ${coursesHtml}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+function clearPerformanceFilters() {
+  const searchInput = document.getElementById("perfStudentSearch");
+  const courseFilter = document.getElementById("perfCourseFilter");
+  const statusFilter = document.getElementById("perfStatusFilter");
+
+  if (searchInput) searchInput.value = "";
+  if (courseFilter) courseFilter.value = "all";
+  if (statusFilter) statusFilter.value = "all";
+
+  perfSearchQuery = "";
+  perfCourseFilterVal = "all";
+  perfStatusFilterVal = "all";
+
+  renderPerformanceSection();
+  showToast("Performance search and filters reset.", "info");
+}
+
+function openAddMarksModal(preselectStudentId, preselectCourseName) {
+  const modal = document.getElementById("addMarksModal");
+  if (!modal) return;
+
+  const select = document.getElementById("marksStudentSelect");
+  if (select) {
+    select.innerHTML = '<option value="">-- Choose Student --</option>';
+    appState.students.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.id;
+      opt.textContent = `${s.name} (${s.id}) - ${s.batch}`;
+      select.appendChild(opt);
+    });
+    if (preselectStudentId) {
+      select.value = preselectStudentId;
+    }
+  }
+
+  const courseSelect = document.getElementById("marksCourseName");
+  if (courseSelect && preselectCourseName) {
+    courseSelect.value = preselectCourseName;
+  }
+
+  // Pre-fill existing marks if student and course are selected
+  if (select && courseSelect && select.value && courseSelect.value) {
+    const s = appState.students.find(st => st.id === select.value);
+    if (s && s.courses) {
+      const c = s.courses.find(item => item.courseName === courseSelect.value);
+      if (c) {
+        document.getElementById("marksObtained").value = c.marksObtained;
+        document.getElementById("marksTotal").value = c.totalMarks || 100;
+      }
+    }
+  }
+
+  updateMarksModalPreview();
+  modal.classList.add("active");
+}
+
+function updateMarksModalPreview() {
+  const obtainedInput = document.getElementById("marksObtained");
+  const totalInput = document.getElementById("marksTotal");
+  const previewPct = document.getElementById("previewPercentage");
+  const previewStatus = document.getElementById("previewStatus");
+
+  if (!obtainedInput || !totalInput || !previewPct || !previewStatus) return;
+
+  const obtained = parseFloat(obtainedInput.value) || 0;
+  const total = parseFloat(totalInput.value) || 100;
+  const pct = total > 0 ? Math.round((obtained / total) * 100) : 0;
+  const gradeInfo = getGrade(pct);
+  const statusInfo = getPerformanceStatus(pct);
+
+  previewPct.textContent = `${pct}% (${gradeInfo.grade})`;
+  previewStatus.className = `status-badge ${statusInfo.statusClass}`;
+  previewStatus.innerHTML = `<i class="${statusInfo.icon}"></i> ${statusInfo.status}`;
+}
+
+function handleAddMarksSubmit(e) {
+  e.preventDefault();
+  const studentId = document.getElementById("marksStudentSelect").value;
+  const courseName = document.getElementById("marksCourseName").value.trim();
+  const marksObtained = parseInt(document.getElementById("marksObtained").value, 10);
+  const marksTotal = parseInt(document.getElementById("marksTotal").value, 10) || 100;
+
+  if (!studentId || !courseName || isNaN(marksObtained)) {
+    showToast("Please provide valid student, course, and marks.", "warning");
+    return;
+  }
+
+  const student = appState.students.find(s => s.id === studentId);
+  if (!student) {
+    showToast("Selected student record not found.", "error");
+    return;
+  }
+
+  ensureStudentCourses(student);
+
+  const existingCourse = student.courses.find(c => c.courseName.toLowerCase() === courseName.toLowerCase());
+  if (existingCourse) {
+    existingCourse.marksObtained = marksObtained;
+    existingCourse.totalMarks = marksTotal;
+  } else {
+    student.courses.push({
+      courseName,
+      totalMarks: marksTotal,
+      marksObtained
+    });
+  }
+
+  // Recalculate student overall score
+  if (student.courses.length > 0) {
+    const avgScore = Math.round(
+      student.courses.reduce((sum, c) => sum + ((c.marksObtained / (c.totalMarks || 100)) * 100), 0) / student.courses.length
+    );
+    student.score = avgScore;
+    student.riskLevel = calculateStudentRisk(student);
+  }
+
+  persistState();
+  closeModal("addMarksModal");
+  document.getElementById("addMarksForm").reset();
+
+  refreshAllViews();
+  if (activeDetailCourse) {
+    renderCourseDetailStudents();
+  }
+  showToast(`Marks recorded for ${student.name}: ${courseName} (${marksObtained}/${marksTotal})!`, "success");
+}
+
+// --- View 6: AI Insights & Alerts ---
 function renderAiInsights() {
   const critical = appState.students.filter(s => s.riskLevel === "Critical");
   const moderate = appState.students.filter(s => s.riskLevel === "Moderate");
 
-  document.getElementById("aiFlaggedCount").textContent = critical.length;
-  document.getElementById("aiModerateCount").textContent = moderate.length;
+  const flaggedElem = document.getElementById("aiFlaggedCount");
+  const modElem = document.getElementById("aiModerateCount");
+  if (flaggedElem) flaggedElem.textContent = critical.length;
+  if (modElem) modElem.textContent = moderate.length;
 
   const container = document.getElementById("aiAlertCardsList");
   if (!container) return;
@@ -1494,16 +2835,19 @@ function renderReports() {
     : appState.students.filter(s => s.batch === reportBatch);
 
   const avgAtt = filtered.length > 0 
-    ? (filtered.reduce((acc, curr) => acc + Number(curr.attendance), 0) / filtered.length).toFixed(1)
+    ? (filtered.reduce((acc, curr) => acc + Number(curr.attendance || 85), 0) / filtered.length).toFixed(1)
     : "0.0";
 
   const criticalCount = filtered.filter(s => s.riskLevel === "Critical").length;
 
-  document.getElementById("repTotalStudents").textContent = filtered.length;
-  document.getElementById("repAvgAttendance").textContent = avgAtt + "%";
-  document.getElementById("repAtRiskCount").textContent = criticalCount;
+  const totalElem = document.getElementById("repTotalStudents");
+  const avgAttElem = document.getElementById("repAvgAttendance");
+  const atRiskElem = document.getElementById("repAtRiskCount");
 
-  // Title update
+  if (totalElem) totalElem.textContent = filtered.length;
+  if (avgAttElem) avgAttElem.textContent = avgAtt + "%";
+  if (atRiskElem) atRiskElem.textContent = criticalCount;
+
   const reportTitleElem = document.getElementById("reportDocName");
   if (reportTitleElem) {
     reportTitleElem.textContent = reportType === "comprehensive" 
@@ -1540,425 +2884,6 @@ function renderReports() {
 }
 
 // ============================================================================
-// 4B. STUDENT COURSE PERFORMANCE CONTROLLER (Requirements 1-11)
-
-// ---------------------------------------------------------------------------
-// Helper: Render clickable course cards grid (main dashboard)
-// ---------------------------------------------------------------------------
-function renderCourseDashboard() {
-  const grid = document.getElementById('courseCardsGrid');
-  if (!grid) return;
-  const coreCourses = ['AI Course', 'Python Programming', 'Web Development', 'Java Programming'];
-  const cardsHtml = coreCourses.map(course => {
-    const iconClass = getCourseIcon(course);
-    const escCourse = course.replace(/'/g, "\\'");
-    return `
-      <div class="course-card" onclick="handleCourseCardClick('${escCourse}')">
-        <i class="${iconClass} card-icon"></i>
-        <span class="course-title">${escapeHTML(course)}</span>
-      </div>`;
-  }).join('');
-  grid.innerHTML = cardsHtml;
-}
-
-// Click handler for a course card – filters student grid to that course
-function handleCourseCardClick(courseName) {
-  const filter = document.getElementById('perfCourseFilter');
-  if (filter) filter.value = courseName;
-  perfCourseFilterVal = courseName;
-  // Reset other filters/search
-  const searchInput = document.getElementById('perfStudentSearch');
-  if (searchInput) searchInput.value = '';
-  perfSearchQuery = '';
-  renderPerformanceSection();
-}
-
-// ---------------------------------------------------------------------------
-// Existing performance rendering logic – augmented to invoke course dashboard
-// ---------------------------------------------------------------------------
-function renderPerformanceSection() {
-  // Render the clickable course cards grid
-  renderCourseDashboard();
-  const gridContainer = document.getElementById('studentPerformanceGrid');
-  if (!gridContainer) return;
-
-  // Ensure the course cards are rendered each time the analytics view is shown
-  renderCourseDashboard();
-
-  const searchInput = document.getElementById('perfStudentSearch');
-  const courseFilter = document.getElementById('perfCourseFilter');
-  const statusFilter = document.getElementById('perfStatusFilter');
-  const countBadge = document.getElementById('perfResultsCount');
-
-  // Preserve existing filter state logic … (rest unchanged)
-
-// ============================================================================
-
-function getPerformanceStatus(percentage) {
-  if (percentage >= 90) {
-    return {
-      status: "Outstanding",
-      badgeClass: "badge-purple",
-      statusClass: "status-outstanding",
-      fillClass: "fill-purple",
-      icon: "fa-solid fa-crown"
-    };
-  } else if (percentage >= 80) {
-    return {
-      status: "Excellent",
-      badgeClass: "badge-success",
-      statusClass: "status-excellent",
-      fillClass: "fill-emerald",
-      icon: "fa-solid fa-star"
-    };
-  } else if (percentage >= 70) {
-    return {
-      status: "Good",
-      badgeClass: "badge-primary",
-      statusClass: "status-good",
-      fillClass: "fill-indigo",
-      icon: "fa-solid fa-thumbs-up"
-    };
-  } else if (percentage >= 50) {
-    return {
-      status: "Average",
-      badgeClass: "badge-warning",
-      statusClass: "status-average",
-      fillClass: "fill-amber",
-      icon: "fa-solid fa-chart-simple"
-    };
-  } else {
-    return {
-      status: "Needs Improvement",
-      badgeClass: "badge-danger",
-      statusClass: "status-improvement",
-      fillClass: "fill-rose",
-      icon: "fa-solid fa-triangle-exclamation"
-    };
-  }
-}
-
-function getCourseIcon(courseName) {
-  const name = (courseName || "").toLowerCase();
-  if (name.includes("python")) return "fa-brands fa-python text-indigo";
-  if (name.includes("java") && !name.includes("script")) return "fa-brands fa-java text-rose";
-  if (name.includes("web") || name.includes("html") || name.includes("css") || name.includes("frontend")) return "fa-solid fa-code text-cyan";
-  if (name.includes("ai") || name.includes("machine learning") || name.includes("ml")) return "fa-solid fa-brain text-purple";
-  if (name.includes("cloud") || name.includes("aws") || name.includes("devops") || name.includes("docker")) return "fa-brands fa-aws text-amber";
-  if (name.includes("security") || name.includes("cyber") || name.includes("soc")) return "fa-solid fa-shield-halved text-emerald";
-  if (name.includes("data") || name.includes("algorithm") || name.includes("structure")) return "fa-solid fa-diagram-project text-cyan";
-  if (name.includes("ui") || name.includes("ux") || name.includes("design")) return "fa-solid fa-palette text-purple";
-  return "fa-solid fa-book-open text-indigo";
-}
-
-let perfSearchQuery = "";
-let perfCourseFilterVal = "all";
-let perfStatusFilterVal = "all";
-
-function renderPerformanceSection() {
-  // Render the clickable course cards grid
-  renderCourseDashboard();
-  const gridContainer = document.getElementById("studentPerformanceGrid");
-  if (!gridContainer) return;
-
-  const searchInput = document.getElementById("perfStudentSearch");
-  const courseFilter = document.getElementById("perfCourseFilter");
-  const statusFilter = document.getElementById("perfStatusFilter");
-  const countBadge = document.getElementById("perfResultsCount");
-
-  // Read current filter state if inputs exist
-  if (searchInput) perfSearchQuery = searchInput.value.trim().toLowerCase();
-  if (courseFilter) perfCourseFilterVal = courseFilter.value;
-  if (statusFilter) perfStatusFilterVal = statusFilter.value;
-
-  // 1. Collect all unique courses to dynamically populate course dropdown
-  const allCourses = new Set();
-  appState.students.forEach(s => {
-    if (s.courses) {
-      s.courses.forEach(c => allCourses.add(c.courseName));
-    }
-  });
-
-  if (courseFilter && courseFilter.options.length <= 1) {
-    const currentVal = courseFilter.value;
-    courseFilter.innerHTML = '<option value="all">All Courses</option>';
-    Array.from(allCourses).sort().forEach(cName => {
-      const opt = document.createElement("option");
-      opt.value = cName;
-      opt.textContent = cName;
-      courseFilter.appendChild(opt);
-    });
-    courseFilter.value = currentVal || "all";
-  }
-
-  // 2. Populate student select in Add Marks Modal
-  const modalStudentSelect = document.getElementById("marksStudentSelect");
-  if (modalStudentSelect) {
-    const currentSelectedId = modalStudentSelect.value;
-    modalStudentSelect.innerHTML = '<option value="">-- Choose Student --</option>';
-    appState.students.forEach(s => {
-      const opt = document.createElement("option");
-      opt.value = s.id;
-      opt.textContent = `${s.name} (${s.id}) - ${s.batch}`;
-      modalStudentSelect.appendChild(opt);
-    });
-    if (currentSelectedId) modalStudentSelect.value = currentSelectedId;
-  }
-
-  // 3. Compute KPI summary stats
-  const totalStudents = appState.students.length;
-  let allPercentages = [];
-  let topStudent = null;
-  let topStudentAvg = -1;
-
-  appState.students.forEach(s => {
-    if (s.courses && s.courses.length > 0) {
-      const studentAvg = s.courses.reduce((sum, c) => sum + ((c.marksObtained / (c.totalMarks || 100)) * 100), 0) / s.courses.length;
-      allPercentages.push(studentAvg);
-      if (studentAvg > topStudentAvg) {
-        topStudentAvg = studentAvg;
-        topStudent = s;
-      }
-    }
-  });
-
-  const overallAvg = allPercentages.length > 0 ? (allPercentages.reduce((a, b) => a + b, 0) / allPercentages.length).toFixed(1) : "0.0";
-
-  const statStudentsElem = document.getElementById("perfStatTotalStudents");
-  const statAvgElem = document.getElementById("perfStatAvgPercentage");
-  const statCoursesElem = document.getElementById("perfStatTotalCourses");
-  const statTopElem = document.getElementById("perfStatTopPerformer");
-
-  if (statStudentsElem) statStudentsElem.textContent = totalStudents;
-  if (statAvgElem) statAvgElem.textContent = `${overallAvg}%`;
-  if (statCoursesElem) statCoursesElem.textContent = allCourses.size;
-  if (statTopElem) statTopElem.textContent = topStudent ? `${topStudent.name} (${Math.round(topStudentAvg)}%)` : "--";
-
-  // 4. Filter Students (Requirements 6 & 7)
-  const filteredStudents = appState.students.filter(student => {
-    // Search by Name (Requirement 6)
-    if (perfSearchQuery && !student.name.toLowerCase().includes(perfSearchQuery)) {
-      return false;
-    }
-
-    // Filter by Course (Requirement 7)
-    if (perfCourseFilterVal !== "all") {
-      const hasCourse = student.courses && student.courses.some(c => c.courseName === perfCourseFilterVal);
-      if (!hasCourse) return false;
-    }
-
-    // Filter by Performance Status
-    if (perfStatusFilterVal !== "all") {
-      const hasStatus = student.courses && student.courses.some(c => {
-        const pct = Math.round((c.marksObtained / (c.totalMarks || 100)) * 100);
-        return getPerformanceStatus(pct).status === perfStatusFilterVal;
-      });
-      if (!hasStatus) return false;
-    }
-
-    return true;
-  });
-
-  // Update counter badge
-  if (countBadge) {
-    countBadge.textContent = `Showing ${filteredStudents.length} of ${totalStudents} Students`;
-  }
-
-  // 5. Render Individual Student Performance Sections
-  if (filteredStudents.length === 0) {
-    gridContainer.innerHTML = `
-      <div class="perf-empty-state">
-        <i class="fa-solid fa-user-slash"></i>
-        <h4>No Student Records Found</h4>
-        <p>No student matches the search "${escapeHTML(perfSearchQuery)}" or selected course filter.</p>
-        <button class="btn btn-primary" onclick="clearPerformanceFilters()">
-          <i class="fa-solid fa-arrow-rotate-left"></i> Reset Search & Filters
-        </button>
-      </div>
-    `;
-    return;
-  }
-
-  gridContainer.innerHTML = filteredStudents.map(student => {
-    const courses = student.courses || [];
-    
-    // Calculate overall student average across all courses
-    const studentAvgPct = courses.length > 0 
-      ? Math.round(courses.reduce((sum, c) => sum + ((c.marksObtained / (c.totalMarks || 100)) * 100), 0) / courses.length)
-      : 0;
-    
-    const initials = getInitials(student.name);
-
-    // Render each course separately (Requirements 2, 3, 5, 8)
-    const coursesHtml = courses.map(course => {
-      const totalMarks = course.totalMarks || 100;
-      const marksObtained = course.marksObtained;
-      // Automatically Calculated Percentage (Requirement 3)
-      const calculatedPercentage = totalMarks > 0 ? Math.round((marksObtained / totalMarks) * 100) : 0;
-      // Performance Status (Requirement 3)
-      const statusInfo = getPerformanceStatus(calculatedPercentage);
-      const courseIcon = getCourseIcon(course.courseName);
-      const isFilteredMatch = perfCourseFilterVal !== "all" && course.courseName === perfCourseFilterVal;
-
-      return `
-        <div class="course-perf-item ${isFilteredMatch ? 'highlighted-course' : ''}">
-          <div class="course-perf-main">
-            <div class="course-name-col">
-              <i class="${courseIcon}"></i>
-              <span class="course-title">${escapeHTML(course.courseName)}</span>
-              ${isFilteredMatch ? '<span class="badge badge-purple" style="font-size: 0.68rem; margin-left: 0.4rem;"><i class="fa-solid fa-check"></i> Selected Filter</span>' : ''}
-            </div>
-            <div class="course-marks-col">
-              <div class="marks-display" title="Marks Obtained / Total Marks (Percentage)">
-                <span class="marks-obtained">${marksObtained}</span>
-                <span class="marks-separator">/</span>
-                <span class="marks-total">${totalMarks}</span>
-                <span class="marks-percentage">(${calculatedPercentage}%)</span>
-              </div>
-              <span class="status-badge ${statusInfo.statusClass}" title="Status: ${statusInfo.status}">
-                <i class="${statusInfo.icon}"></i> ${statusInfo.status}
-              </span>
-            </div>
-          </div>
-
-          <!-- Progress Bar for Course Marks Percentage (Requirement 8) -->
-          <div class="perf-progress-wrap" title="${escapeHTML(course.courseName)}: ${calculatedPercentage}%">
-            <div class="perf-progress-track">
-              <div class="perf-progress-fill ${statusInfo.fillClass}" style="width: ${calculatedPercentage}%;"></div>
-            </div>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    return `
-      <!-- Student Separate Performance Section (Requirements 1, 4) -->
-      <div class="student-perf-card card" id="perf-card-${escapeHTML(student.id)}">
-        <div class="student-perf-card-header">
-          <div class="student-perf-user-info">
-            <div class="student-avatar-badge">${initials}</div>
-            <div>
-              <div class="student-name-label">
-                Student Name: <span class="student-name-val">${escapeHTML(student.name)}</span>
-              </div>
-              <div class="student-submeta">
-                <span class="badge badge-outline"><i class="fa-solid fa-id-card"></i> ${escapeHTML(student.id)}</span>
-                <span class="badge badge-outline"><i class="fa-solid fa-layer-group"></i> ${escapeHTML(student.batch)}</span>
-                <button class="btn btn-sm btn-ghost" style="padding: 0.1rem 0.4rem; font-size: 0.72rem;" onclick="openAddMarksModal('${student.id}')" title="Add or edit course marks">
-                  <i class="fa-solid fa-plus-circle text-purple"></i> Add Marks
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="student-overall-summary">
-            <div class="overall-badge-pill">
-              <span class="overall-label">Courses: <strong>${courses.length}</strong></span>
-              <span class="overall-avg">Overall: <strong>${studentAvgPct}%</strong></span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Student Courses List (Requirements 2, 5) -->
-        <div class="student-courses-list">
-          ${coursesHtml}
-        </div>
-      </div>
-    `;
-  }).join('');
-}
-
-function clearPerformanceFilters() {
-  const searchInput = document.getElementById("perfStudentSearch");
-  const courseFilter = document.getElementById("perfCourseFilter");
-  const statusFilter = document.getElementById("perfStatusFilter");
-
-  if (searchInput) searchInput.value = "";
-  if (courseFilter) courseFilter.value = "all";
-  if (statusFilter) statusFilter.value = "all";
-
-  perfSearchQuery = "";
-  perfCourseFilterVal = "all";
-  perfStatusFilterVal = "all";
-
-  renderPerformanceSection();
-  showToast("Performance search and filters reset.", "info");
-}
-
-function openAddMarksModal(preselectStudentId) {
-  const modal = document.getElementById("addMarksModal");
-  if (!modal) return;
-  const select = document.getElementById("marksStudentSelect");
-  if (select && preselectStudentId) {
-    select.value = preselectStudentId;
-  }
-  updateMarksModalPreview();
-  modal.classList.add("active");
-}
-
-function updateMarksModalPreview() {
-  const obtainedInput = document.getElementById("marksObtained");
-  const totalInput = document.getElementById("marksTotal");
-  const previewPct = document.getElementById("previewPercentage");
-  const previewStatus = document.getElementById("previewStatus");
-
-  if (!obtainedInput || !totalInput || !previewPct || !previewStatus) return;
-
-  const obtained = parseFloat(obtainedInput.value) || 0;
-  const total = parseFloat(totalInput.value) || 100;
-  const pct = total > 0 ? Math.round((obtained / total) * 100) : 0;
-  const statusInfo = getPerformanceStatus(pct);
-
-  previewPct.textContent = `${pct}%`;
-  previewStatus.className = `status-badge ${statusInfo.statusClass}`;
-  previewStatus.innerHTML = `<i class="${statusInfo.icon}"></i> ${statusInfo.status}`;
-}
-
-function handleAddMarksSubmit(e) {
-  e.preventDefault();
-  const studentId = document.getElementById("marksStudentSelect").value;
-  const courseName = document.getElementById("marksCourseName").value.trim();
-  const marksObtained = parseInt(document.getElementById("marksObtained").value, 10);
-  const totalMarks = parseInt(document.getElementById("marksTotal").value, 10) || 100;
-
-  if (!studentId || !courseName || isNaN(marksObtained)) {
-    showToast("Please fill in all required fields.", "danger");
-    return;
-  }
-
-  const student = appState.students.find(s => s.id === studentId);
-  if (!student) {
-    showToast("Selected student not found.", "danger");
-    return;
-  }
-
-  if (!student.courses) student.courses = [];
-
-  // Check if course already exists for this student
-  const existingIdx = student.courses.findIndex(c => c.courseName.toLowerCase() === courseName.toLowerCase());
-  if (existingIdx >= 0) {
-    student.courses[existingIdx].marksObtained = marksObtained;
-    student.courses[existingIdx].totalMarks = totalMarks;
-  } else {
-    student.courses.push({
-      courseName: courseName,
-      totalMarks: totalMarks,
-      marksObtained: marksObtained
-    });
-  }
-
-  // Recalculate average score for student profile
-  const avgPct = Math.round(student.courses.reduce((sum, c) => sum + ((c.marksObtained / c.totalMarks) * 100), 0) / student.courses.length);
-  student.score = avgPct;
-  student.riskLevel = calculateStudentRisk(student);
-
-  persistState();
-  closeModal("addMarksModal");
-  document.getElementById("addMarksForm").reset();
-  refreshAllViews();
-  showToast(`Marks recorded for ${student.name}: ${courseName} (${marksObtained}/${totalMarks})!`, "success");
-}
-
-// ============================================================================
 // 5. INTERACTION HANDLERS & MODALS
 // ============================================================================
 
@@ -1966,7 +2891,6 @@ function handleAddMarksSubmit(e) {
 function switchView(viewName) {
   appState.currentView = viewName;
 
-  // Update Nav Links
   document.querySelectorAll(".nav-link").forEach(link => {
     if (link.getAttribute("data-view") === viewName) {
       link.classList.add("active");
@@ -1975,7 +2899,6 @@ function switchView(viewName) {
     }
   });
 
-  // Switch Sections
   document.querySelectorAll(".view-section").forEach(sec => {
     sec.classList.remove("active");
   });
@@ -1985,11 +2908,9 @@ function switchView(viewName) {
     targetSection.classList.add("active");
   }
 
-  // Close notifications dropdown if open
   const notifDropdown = document.getElementById("notificationsDropdown");
   if (notifDropdown) notifDropdown.classList.remove("active");
 
-  // Update Breadcrumb
   const titles = {
     dashboard: "Dashboard Overview",
     students: "Student Management & Registry",
@@ -2004,13 +2925,9 @@ function switchView(viewName) {
     titleElem.textContent = titles[viewName];
   }
 
-  // Update URL hash smoothly
   window.location.hash = viewName;
-
-  // Close Mobile Sidebar if opened
   closeMobileSidebar();
 
-  // Trigger relevant renders & resize active charts
   if (viewName === "students") renderStudentsTable();
   if (viewName === "trainers") renderTrainers();
   if (viewName === "attendance") renderAttendanceTable();
@@ -2019,21 +2936,29 @@ function switchView(viewName) {
   if (viewName === "dashboard") {
     renderDashboard();
     updateChartData();
-    if (chartInstances.attendanceTrend) chartInstances.attendanceTrend.resize();
-    if (chartInstances.batchPerformance) chartInstances.batchPerformance.resize();
+    if (useNativeCharts) {
+      renderNativeCharts();
+    } else {
+      if (chartInstances.attendanceTrend) chartInstances.attendanceTrend.resize();
+      if (chartInstances.batchPerformance) chartInstances.batchPerformance.resize();
+    }
   }
   if (viewName === "analytics") {
     renderPerformanceSection();
-    if (chartInstances.analyticsComparison) chartInstances.analyticsComparison.resize();
-    if (chartInstances.analyticsRisk) chartInstances.analyticsRisk.resize();
-    if (chartInstances.analyticsRadar) chartInstances.analyticsRadar.resize();
+    if (useNativeCharts) {
+      drawNativeComparisonChart();
+      drawNativeRiskDoughnut();
+      drawNativeRadarChart();
+    } else {
+      if (chartInstances.analyticsComparison) chartInstances.analyticsComparison.resize();
+      if (chartInstances.analyticsRisk) chartInstances.analyticsRisk.resize();
+      if (chartInstances.analyticsRadar) chartInstances.analyticsRadar.resize();
+    }
   }
 
-  // Scroll to top of content
   window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
-// Modal Controllers
 function openModal(modalId) {
   const modal = document.getElementById(modalId);
   if (modal) modal.classList.add("active");
@@ -2044,22 +2969,24 @@ function closeModal(modalId) {
   if (modal) modal.classList.remove("active");
 }
 
-// Student Details Modal (Profile + AI Diagnostic)
 function openStudentModal(studentId) {
   const student = appState.students.find(s => s.id === studentId);
   if (!student) return;
 
-  document.getElementById("modalStudentName").textContent = student.name;
-  document.getElementById("modalStudentId").textContent = `ID: ${student.id} • ${student.batch}`;
+  const nameElem = document.getElementById("modalStudentName");
+  const idElem = document.getElementById("modalStudentId");
+  if (nameElem) nameElem.textContent = student.name;
+  if (idElem) idElem.textContent = `ID: ${student.id} • ${student.batch}`;
 
   const body = document.getElementById("modalStudentBody");
   if (body) {
+    const courses = student.courses || [];
     body.innerHTML = `
       <div class="diagnostic-hero">
         <div class="diagnostic-avatar-large">${getInitials(student.name)}</div>
         <div class="diagnostic-hero-details">
           <h4>${escapeHTML(student.name)}</h4>
-          <p>${escapeHTML(student.email)} • ${escapeHTML(student.phone || 'Phone verified')}</p>
+          <p>${escapeHTML(student.email)} • ${escapeHTML(student.phone || '+91 98000 00000')}</p>
           <div style="margin-top: 0.35rem;">
             <span class="pill-badge pill-purple">${escapeHTML(student.batch)}</span>
             <span class="pill-badge pill-cyan">Trainer: ${escapeHTML(student.trainer)}</span>
@@ -2102,31 +3029,21 @@ function openStudentModal(studentId) {
         `}
       </div>
 
-      <div style="margin-top: 1rem;">
-        <h5 style="font-size: 0.88rem; font-weight: 700; color: var(--text-main); margin-bottom: 0.65rem; display: flex; align-items: center; justify-content: space-between;">
-          <span><i class="fa-solid fa-graduation-cap text-indigo"></i> Enrolled Courses & Marks Breakdown</span>
-          <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: 500;">${(student.courses || []).length} Courses</span>
-        </h5>
-        <div style="display: flex; flex-direction: column; gap: 0.5rem;">
-          ${(student.courses || []).map(c => {
-            const tot = c.totalMarks || 100;
-            const pct = tot > 0 ? Math.round((c.marksObtained / tot) * 100) : 0;
-            const st = getPerformanceStatus(pct);
+      <!-- Enrolled Courses Breakdown -->
+      <div style="margin-top: 1.2rem;">
+        <h5 style="font-size: 0.9rem; color: #fff; margin-bottom: 0.6rem;"><i class="fa-solid fa-graduation-cap text-indigo"></i> Evaluated Course Marks</h5>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.65rem;">
+          ${courses.map(c => {
+            const pct = Math.round((c.marksObtained / (c.totalMarks || 100)) * 100);
+            const g = getGrade(pct);
             return `
-              <div style="background: rgba(14, 21, 38, 0.6); border: 1px solid var(--border-subtle); border-radius: 8px; padding: 0.6rem 0.85rem;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                  <span style="font-size: 0.85rem; font-weight: 600; color: var(--text-main);">${escapeHTML(c.courseName)}</span>
-                  <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 0.82rem; color: var(--text-muted);">
-                      <strong style="color: #fff;">${c.marksObtained}</strong>/${tot} (${pct}%)
-                    </span>
-                    <span class="status-badge ${st.statusClass}" style="font-size: 0.68rem; padding: 0.15rem 0.4rem;">
-                      <i class="${st.icon}"></i> ${st.status}
-                    </span>
-                  </div>
+              <div style="background: rgba(255,255,255,0.03); border: 1px solid var(--border-subtle); padding: 0.65rem 0.85rem; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.78rem; color: var(--text-muted);">
+                  <span>${escapeHTML(c.courseName)}</span>
+                  <span class="grade-badge ${g.color}" style="font-size: 0.7rem; padding: 0.1rem 0.4rem;">${g.grade}</span>
                 </div>
-                <div class="perf-progress-track" style="height: 6px;">
-                  <div class="perf-progress-fill ${st.fillClass}" style="width: ${pct}%;"></div>
+                <div style="font-size: 1.1rem; font-weight: 800; color: #fff; font-family: 'JetBrains Mono'; margin-top: 0.2rem;">
+                  ${c.marksObtained} <span style="font-size: 0.75rem; color: var(--text-dim);">/ ${c.totalMarks || 100} (${pct}%)</span>
                 </div>
               </div>
             `;
@@ -2136,7 +3053,6 @@ function openStudentModal(studentId) {
     `;
   }
 
-  // Bind Alert button
   const alertBtn = document.getElementById("modalSendAlertBtn");
   if (alertBtn) {
     alertBtn.onclick = () => {
@@ -2148,7 +3064,6 @@ function openStudentModal(studentId) {
   openModal("studentDetailsModal");
 }
 
-// Add New Student Handler (Requirement 4)
 function handleAddStudentSubmit(e) {
   e.preventDefault();
 
@@ -2156,13 +3071,11 @@ function handleAddStudentSubmit(e) {
   const email = document.getElementById("newStudentEmail").value.trim();
   const batch = document.getElementById("newStudentBatch").value;
   const phone = document.getElementById("newStudentPhone").value.trim() || "+91 98000 00000";
-  const attendance = parseInt(document.getElementById("newStudentAttendance").value) || 90;
-  const score = parseInt(document.getElementById("newStudentScore").value) || 85;
-  const notes = document.getElementById("newStudentNotes").value.trim() || "Enrolled through centre online portal.";
+  const attendance = parseInt(document.getElementById("newStudentAttendance").value, 10) || 90;
+  const score = parseInt(document.getElementById("newStudentScore").value, 10) || 85;
+  const notes = document.getElementById("newStudentNotes").value.trim() || "Enrolled through centre portal.";
 
-  // Find trainer assigned to this batch
   const trainerObj = appState.trainers.find(t => t.batches.includes(batch)) || appState.trainers[0];
-
   const newId = `STU-${Math.floor(100 + Math.random() * 900)}`;
 
   const newStudent = {
@@ -2185,6 +3098,7 @@ function handleAddStudentSubmit(e) {
     newStudent.riskFactors.push("Initial attendance/score below compliance target.");
   }
 
+  ensureStudentCourses(newStudent);
   appState.students.unshift(newStudent);
   persistState();
 
@@ -2195,7 +3109,6 @@ function handleAddStudentSubmit(e) {
   showToast(`Student ${name} (${newId}) enrolled successfully!`, "success");
 }
 
-// Add New Trainer Handler
 function handleAddTrainerSubmit(e) {
   e.preventDefault();
   const name = document.getElementById("newTrainerName").value.trim();
@@ -2228,7 +3141,6 @@ function handleAddTrainerSubmit(e) {
   showToast(`Faculty instructor ${name} assigned to ${batch}!`, "success");
 }
 
-// Quick Attendance Toggle in Student Table
 function quickToggleAttendance(studentId) {
   const student = appState.students.find(s => s.id === studentId);
   if (student) {
@@ -2247,7 +3159,6 @@ function quickToggleAttendance(studentId) {
   }
 }
 
-// Delete Student
 function deleteStudent(studentId) {
   const student = appState.students.find(s => s.id === studentId);
   if (!student) return;
@@ -2260,19 +3171,26 @@ function deleteStudent(studentId) {
   }
 }
 
-// Export Students to CSV (Requirement 4)
 function exportStudentsCSV() {
-  const headers = ["Student ID", "Full Name", "Email", "Batch", "Trainer", "Attendance %", "Score %", "AI Risk Level"];
-  const rows = appState.students.map(s => [
-    s.id,
-    `"${s.name}"`,
-    s.email,
-    `"${s.batch}"`,
-    `"${s.trainer}"`,
-    s.attendance,
-    s.score,
-    s.riskLevel
-  ]);
+  const headers = ["Student ID", "Full Name", "Email", "Batch", "Trainer", "Attendance %", "Score %", "AI Risk Level", "AI Fundamentals", "Web Dev", "Python Prog", "Data Analytics"];
+  const rows = appState.students.map(s => {
+    const cMap = {};
+    (s.courses || []).forEach(c => { cMap[c.courseName] = c.marksObtained; });
+    return [
+      s.id,
+      `"${s.name}"`,
+      s.email,
+      `"${s.batch}"`,
+      `"${s.trainer}"`,
+      s.attendance,
+      s.score,
+      s.riskLevel,
+      cMap["AI Fundamentals"] || "--",
+      cMap["Web Development"] || "--",
+      cMap["Python Programming"] || "--",
+      cMap["Data Analytics"] || "--"
+    ];
+  });
 
   const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
   const encodedUri = encodeURI(csvContent);
@@ -2286,7 +3204,6 @@ function exportStudentsCSV() {
   showToast("Exported student roster as CSV file!", "success");
 }
 
-// Toast Notification System
 function showToast(message, type = "info") {
   const container = document.getElementById("toastContainer");
   if (!container) return;
@@ -2315,7 +3232,6 @@ function showToast(message, type = "info") {
   }, 4000);
 }
 
-// Live Clock in Topbar
 function startLiveClock() {
   const clockElem = document.getElementById("liveClock");
   function update() {
@@ -2328,7 +3244,6 @@ function startLiveClock() {
   setInterval(update, 1000);
 }
 
-// Refresh all views
 function refreshAllViews() {
   renderDashboard();
   renderStudentsTable();
@@ -2340,7 +3255,6 @@ function refreshAllViews() {
   updateChartData();
 }
 
-// Helpers
 function getInitials(name) {
   if (!name) return "AI";
   const parts = name.trim().split(" ");
@@ -2372,15 +3286,19 @@ function closeMobileSidebar() {
 // ============================================================================
 
 document.addEventListener("DOMContentLoaded", () => {
-  // 1. Initialize State
-  initDataState();
+  try {
+    // 1. Initialize State
+    initDataState();
 
-  // 2. Start Clocks & Charts
-  startLiveClock();
-  initCharts();
+    // 2. Start Clocks & Charts
+    startLiveClock();
+    initCharts();
 
-  // 3. Render Default Dashboard
-  refreshAllViews();
+    // 3. Render Default Dashboard
+    refreshAllViews();
+  } catch (err) {
+    console.error("Initial dashboard render encountered an error:", err);
+  }
 
   // 4. Default Date in Attendance Picker
   const datePicker = document.getElementById("attendanceDatePicker");
@@ -2494,7 +3412,7 @@ document.addEventListener("DOMContentLoaded", () => {
     addTrainerForm.addEventListener("submit", handleAddTrainerSubmit);
   }
 
-  // 9. Attendance View Controls (Requirement 5)
+  // 9. Attendance View Controls
   const attendBatchSelect = document.getElementById("attendanceBatchSelect");
   if (attendBatchSelect) {
     attendBatchSelect.addEventListener("change", renderAttendanceTable);
@@ -2523,7 +3441,7 @@ document.addEventListener("DOMContentLoaded", () => {
       setTimeout(() => {
         runAiBtn.innerHTML = '<i class="fa-solid fa-bolt"></i> Run AI Diagnosis';
         refreshAllViews();
-        showToast("Apex AI diagnosis complete: 24 profiles verified. 3 at-risk alerts active.", "success");
+        showToast("Apex AI diagnosis complete: 26 profiles verified. 3 at-risk alerts active.", "success");
       }, 700);
     });
   }
@@ -2617,68 +3535,48 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 15. Timeframe change on dashboard chart
   const timeframeSelect = document.getElementById("chartTimeframeSelect");
-  if (timeframeSelect && chartInstances.attendanceTrend) {
+  if (timeframeSelect) {
     timeframeSelect.addEventListener("change", () => {
       const mode = timeframeSelect.value;
-      if (mode === "weekly") {
-        chartInstances.attendanceTrend.data.labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Today"];
-        chartInstances.attendanceTrend.data.datasets[0].data = [92, 89, 94, 88, 91, 85, 88.5];
-      } else {
-        chartInstances.attendanceTrend.data.labels = ["Week 1", "Week 2", "Week 3", "Week 4"];
-        chartInstances.attendanceTrend.data.datasets[0].data = [86.2, 89.1, 87.8, 88.5];
+      if (useNativeCharts) {
+        drawNativeAttendanceTrend(mode);
+      } else if (chartInstances.attendanceTrend) {
+        if (mode === "weekly") {
+          chartInstances.attendanceTrend.data.labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Today"];
+          chartInstances.attendanceTrend.data.datasets[0].data = [92, 89, 94, 88, 91, 85, 88.5];
+        } else {
+          chartInstances.attendanceTrend.data.labels = ["Week 1", "Week 2", "Week 3", "Week 4"];
+          chartInstances.attendanceTrend.data.datasets[0].data = [86.2, 89.1, 87.8, 88.5];
+        }
+        chartInstances.attendanceTrend.update();
       }
-      chartInstances.attendanceTrend.update();
       showToast(`Attendance chart switched to ${mode} mode.`, "info");
     });
   }
 
-  // 16. Refresh analytics button
-  const refreshAnalyticsBtn = document.getElementById("refreshAnalyticsBtn");
-  if (refreshAnalyticsBtn) {
-    refreshAnalyticsBtn.addEventListener("click", () => {
-      updateChartData();
-      renderPerformanceSection();
-      showToast("Performance records and competency metrics refreshed!", "success");
-    });
-  }
+  // 16. Performance Section Listeners
+  const perfStudentSearch = document.getElementById("perfStudentSearch");
+  const perfCourseFilter = document.getElementById("perfCourseFilter");
+  const perfStatusFilter = document.getElementById("perfStatusFilter");
+  const clearPerfFiltersBtn = document.getElementById("clearPerfFiltersBtn");
 
-  // 16B. Performance Section Real-time Controls (Requirements 6, 7)
-  const perfSearchInput = document.getElementById("perfStudentSearch");
-  if (perfSearchInput) {
-    perfSearchInput.addEventListener("input", () => {
-      renderPerformanceSection();
-    });
-  }
+  if (perfStudentSearch) perfStudentSearch.addEventListener("input", renderPerformanceSection);
+  if (perfCourseFilter) perfCourseFilter.addEventListener("change", renderPerformanceSection);
+  if (perfStatusFilter) perfStatusFilter.addEventListener("change", renderPerformanceSection);
+  if (clearPerfFiltersBtn) clearPerfFiltersBtn.addEventListener("click", clearPerformanceFilters);
 
-  const perfCourseSelect = document.getElementById("perfCourseFilter");
-  if (perfCourseSelect) {
-    perfCourseSelect.addEventListener("change", () => {
-      renderPerformanceSection();
-    });
-  }
+  // Course Detail View (Level 2) Listeners
+  const courseDetailSearch = document.getElementById("courseDetailStudentSearch");
+  const courseDetailStatus = document.getElementById("courseDetailStatusFilter");
+  if (courseDetailSearch) courseDetailSearch.addEventListener("input", renderCourseDetailStudents);
+  if (courseDetailStatus) courseDetailStatus.addEventListener("change", renderCourseDetailStudents);
 
-  const perfStatusSelect = document.getElementById("perfStatusFilter");
-  if (perfStatusSelect) {
-    perfStatusSelect.addEventListener("change", () => {
-      renderPerformanceSection();
-    });
-  }
-
-  const clearPerfBtn = document.getElementById("clearPerfFiltersBtn");
-  if (clearPerfBtn) {
-    clearPerfBtn.addEventListener("click", () => {
-      clearPerformanceFilters();
-    });
-  }
-
-  const openAddMarksBtn = document.getElementById("openAddMarksModalBtn");
-  if (openAddMarksBtn) {
-    openAddMarksBtn.addEventListener("click", () => {
-      openAddMarksModal();
-    });
-  }
-
+  const openAddMarksModalBtn = document.getElementById("openAddMarksModalBtn");
   const addMarksForm = document.getElementById("addMarksForm");
+
+  if (openAddMarksModalBtn) {
+    openAddMarksModalBtn.addEventListener("click", () => openAddMarksModal());
+  }
   if (addMarksForm) {
     addMarksForm.addEventListener("submit", handleAddMarksSubmit);
   }
@@ -2687,6 +3585,32 @@ document.addEventListener("DOMContentLoaded", () => {
   const marksTotalInput = document.getElementById("marksTotal");
   if (marksObtainedInput) marksObtainedInput.addEventListener("input", updateMarksModalPreview);
   if (marksTotalInput) marksTotalInput.addEventListener("input", updateMarksModalPreview);
+
+  const marksCourseSelect = document.getElementById("marksCourseName");
+  const marksStudentSelect = document.getElementById("marksStudentSelect");
+  if (marksCourseSelect) {
+    marksCourseSelect.addEventListener("change", () => {
+      if (marksStudentSelect && marksStudentSelect.value) {
+        const s = appState.students.find(st => st.id === marksStudentSelect.value);
+        if (s && s.courses) {
+          const c = s.courses.find(item => item.courseName === marksCourseSelect.value);
+          if (c) {
+            document.getElementById("marksObtained").value = c.marksObtained;
+            document.getElementById("marksTotal").value = c.totalMarks || 100;
+            updateMarksModalPreview();
+          }
+        }
+      }
+    });
+  }
+
+  const refreshAnalyticsBtn = document.getElementById("refreshAnalyticsBtn");
+  if (refreshAnalyticsBtn) {
+    refreshAnalyticsBtn.addEventListener("click", () => {
+      refreshAllViews();
+      showToast("Performance and competency metrics refreshed!", "success");
+    });
+  }
 
   // 17. Close modals on backdrop click or Escape key
   document.querySelectorAll(".modal-backdrop").forEach(backdrop => {
@@ -2704,10 +3628,25 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // Initial welcome toast
+  // Window resize handler for native canvas charts
+  window.addEventListener("resize", () => {
+    if (useNativeCharts) {
+      if (appState.currentView === "dashboard") {
+        const timeframeSelect = document.getElementById("chartTimeframeSelect");
+        drawNativeAttendanceTrend(timeframeSelect ? timeframeSelect.value : "weekly");
+        drawNativeBatchPerformance();
+      } else if (appState.currentView === "analytics") {
+        drawNativeComparisonChart();
+        drawNativeRiskDoughnut();
+        drawNativeRadarChart();
+      }
+    }
+  });
+
+  // Welcome toast
   setTimeout(() => {
-    showToast("ApexAI Monitoring System initialized. All services operational.", "success");
-  }, 800);
+    showToast("ApexAI Monitoring System initialized. All operations active.", "success");
+  }, 700);
 });
 
 // Expose core controller functions to window scope for inline HTML handlers
@@ -2725,7 +3664,11 @@ window.showToast = showToast;
 window.markAllInBatch = markAllInBatch;
 window.exportStudentsCSV = exportStudentsCSV;
 window.resetToDefaultState = resetToDefaultState;
-window.saveCurrentBatchAttendance = saveCurrentBatchAttendance;
+window.openCoursePerformance = openCoursePerformance;
+window.backToPerformanceDashboard = backToPerformanceDashboard;
+window.clearCourseDetailFilters = clearCourseDetailFilters;
+window.handleCourseCardClick = handleCourseCardClick;
+window.renderCourseDashboard = renderCourseDashboard;
 window.renderPerformanceSection = renderPerformanceSection;
 window.clearPerformanceFilters = clearPerformanceFilters;
 window.openAddMarksModal = openAddMarksModal;
